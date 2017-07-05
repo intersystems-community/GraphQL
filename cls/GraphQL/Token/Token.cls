@@ -20,7 +20,6 @@ Parameter EQUALS = 8;
 Parameter AT = 9;
 
 Parameter BRACKETL = 10;
-
 Parameter BRACKETR = 11;
 
 Parameter BRACEL = 12;
@@ -70,7 +69,7 @@ Method GetTokenKindDescription(TokenKind)
 		
 		if $Data(Kind)
 		{
-			Return Kind
+			return Kind
 		}else{
 			return ""
 		}
