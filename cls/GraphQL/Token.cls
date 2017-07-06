@@ -1,4 +1,4 @@
-Class GraphQL.Token.Token
+Class GraphQL.Token
 {
 
 Parameter EOF = 1;
@@ -20,6 +20,7 @@ Parameter EQUALS = 8;
 Parameter AT = 9;
 
 Parameter BRACKETL = 10;
+
 Parameter BRACKETR = 11;
 
 Parameter BRACEL = 12;
