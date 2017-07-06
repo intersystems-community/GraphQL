@@ -45,35 +45,28 @@ Property Value As %String;
 
 Property TokenKind;
 
-Method GetTokenKindDescription(TokenKind)
+Method GetTokenKindDescription(TokenKind) [ CodeMode = expression ]
 {
-	set Kind = $case(TokenKind,
-		..#EOF:"EOF",
-		..#BANG:"!",
-		..#DOLLAR:"$",
-		..#PARENL:"(",
-		..#PARENR:")",
-		..#SPREAD:"...",
-		..#COLON:":",
-		..#EQUALS:"=",
-		..#AT:"@",
-		..#BRACKETL:"[",
-		..#BRACKETR:"]",
-		..#BRACEL:"{",
-		..#PIPE:"|",
-		..#BRACER:"}",
-		..#NAME:"Name",
-		..#INT:"Int",
-		..#FLOAT:"Float",
-		..#STRING:"String"
-		)
-		
-		if $Data(Kind)
-		{
-			return Kind
-		}else{
-			return ""
-		}
+$case(TokenKind,
+	..#EOF:"EOF",
+	..#BANG:"!",
+	..#DOLLAR:"$",
+	..#PARENL:"(",
+	..#PARENR:")",
+	..#SPREAD:"...",
+	..#COLON:":",
+	..#EQUALS:"=",
+	..#AT:"@",
+	..#BRACKETL:"[",
+	..#BRACKETR:"]",
+	..#BRACEL:"{",
+	..#PIPE:"|",
+	..#BRACER:"}",
+	..#NAME:"Name",
+	..#INT:"Int",
+	..#FLOAT:"Float",
+	..#STRING:"String",
+	:"")
 }
 
 Method GetKind()
