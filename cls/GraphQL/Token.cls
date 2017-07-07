@@ -43,7 +43,16 @@ Property End As %Integer;
 
 Property Value As %String;
 
-Property TokenKind;
+Property Kind;
+
+Method %OnNew(Start As %Integer, End As %Integer, Kind, Value As %String) As %Status
+{
+	set ..Start = Start
+	set ..End = End
+	set ..Kind = Kind
+	set ..Value = Value
+	return $$$OK
+}
 
 Method GetTokenKindDescription(TokenKind) [ CodeMode = expression ]
 {
@@ -73,9 +82,9 @@ Method GetKind()
 {
 	if ..Value '= ""
 	{
-		return ..GetTokenKindDescription(..TokenKind)_" """_..Value_""""
+		return ..GetTokenKindDescription(..Kind)_" """_..Value_""""
 	}else{
-		return ..GetTokenKindDescription(..TokenKind)
+		return ..GetTokenKindDescription(..Kind)
 	}
 }
 
