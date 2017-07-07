@@ -1,10 +1,10 @@
 Class GraphQL.Exceptions.GraphQLSyntaxErrorException
 {
 
-Method %OnNew(Description As %String, Source As GraphQL.Source, Loc As %Integer)
+ClassMethod Get(Description As %String, Source As GraphQL.Source, Loc As %Integer) As %Exception.General
 {
 	set Location = ##class(GraphQL.Location).%New(Source, Loc)
-	THROW ##class(%Exception.General).%New("Syntax Error GraphQL","1",,Description_" in line "_Location.Line_" in column "_Location.Column)
+	return ##class(%Exception.General).%New("Syntax Error GraphQL","1",,Description_" in line "_Location.Line_" in column "_Location.Column)
 }
 
 }

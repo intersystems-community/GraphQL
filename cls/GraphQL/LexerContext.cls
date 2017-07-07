@@ -24,64 +24,63 @@ Method GetToken() As Token
 	
 	set Unicode = ..IfUnicodeGetString()
 	
-	set Code = $Extract(..Source.Body,..CurrentIndex)
+	set Char = $Extract(..Source.Body,..CurrentIndex)
 	
-	do ..ValidateCharacterCode(Code)
+	do ..ValidateCharacterCode(Char)
 	
-	set Token = ..CheckForPunctuationTokens(Code)
+	set Token = ..CheckForPunctuationTokens(Char)
 	
 	return:Token'="" Token
 	
-	return:Code?1(1A,1"_") ..ReadName() 
+	return:Char?1(1A,1"_") ..ReadName() 
 	
-	return:Code?1(1A,1"-") ..ReadNumber() 
+	return:Char?1(1A,1"-") ..ReadNumber() 
 	
-	return:Code="""" ..ReadString()
+	return:Char="""" ..ReadString()
 }
 
 Method ReadName() As Token
 {
 	set Start = ..CurrentIndex
-	set Code = "0"
 	
 	do
 	{
 		set ..CurrentIndex = ..CurrentIndex + 1
-		set Code = ..GetCode()
+		set Char = ..GetChar()
 	}
-	while(..IsNotAtTheEndOfQuery() && ..IsValidNameCharacter(Code))
+	while(..IsNotAtTheEndOfQuery() && ..IsValidNameCharacter(Char))
 	
 	return ..CreateNameToken(Start)
 }
 
 Method ReadNumber() As Token
 {
-	set IsFloat = 0
+	set IsFloat = $$$NO
 	set Start = ..CurrentIndex
-	set Code = $Extract(..Source.Body,Start)
+	set Char = $Extract(..Source.Body, Start)
 	
-	if (Code = "-") set Code = ..NextCode()
-	set NextCode = $Select(Code="0":..NextCode(),1:..ReadDigitsFromOwnSource(Code))
+	if (Char = "-") set Char = ..NextChar()
+	set NextChar = $Select(Char="0":..NextChar(),1:..ReadDigitsFromOwnSource(Char))
 	
-	if ($Ascii(NextCode) >= 48 && $Ascii(NextCode) <= 57)
+	if ($Ascii(NextChar) >= 48 && $Ascii(NextChar) <= 57)
 	{
-		do ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid number, unexpected digit after "_Code_": "_NextCode,..Source,..CurrentIndex)
+		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, unexpected digit after "_Char_": "_NextChar,..Source,..CurrentIndex)
 	}
 	
-	set Code = ..NextCode()
+	set Char = ..NextChar()
 	
-	if (Code = ".")
+	if (Char = ".")
 	{
 		set IsFloat = 1
-		set Code = ..ReadDigitsFromOwnSource(..NextCode())
+		set Char = ..ReadDigitsFromOwnSource(..NextChar())
 	}
 	
-	if (Code = "E" || Code = "e")
+	if (Char = "E" || Char = "e")
 	{
 		set IsFloat = 1
-		set Code = ..NextCode()
-		if (Code = "+" || Code = "-") set Code = ..NextCode()
-		set Code = ..ReadDigitsFromOwnSource(Code)
+		set Char = ..NextChar()
+		if (Char = "+" || Char = "-") set Char = ..NextChar()
+		set Char = ..ReadDigitsFromOwnSource(Char)
 	}
 
 	return $Select(IsFloat: ..CreateFloatToken(Start), 1: ..CreateIntToken(Start))
@@ -94,35 +93,35 @@ Method ReadString() As Token
 	return ##class(Token).%OnNew(Start,..CurrentIndex + 1, $$$STRING, Value)
 }
 
-Method ReadDigitsFromOwnSource(Code As %Char) As %Char
+Method ReadDigitsFromOwnSource(Char As %Char) As %Char
 {
-	set ..CurrentIndex = ..ReadDigits(..Source,..CurrentIndex,Code)
-	set Code = ..GetCode()
-	return Code
+	set ..CurrentIndex = ..ReadDigits(..Source,..CurrentIndex,Char)
+	set Char = ..GetChar()
+	return Char
 }
 
-Method ReadDigits(Source As Source, Start As %Integer, FirstCode As %Char) As %Integer
+Method ReadDigits(Source As Source, Start As %Integer, FirstChar As %Char) As %Integer
 {
 	set Body = Source.Body
 	set Position = Start
-	set Code = FirstCode
+	set Char = FirstChar
 	
-	do:'Code?1N ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid number, expected digit but got: "_..ResolveCharName(Code),..Source,..CurrentIndex) 
+	throw:'Char?1N ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, expected digit but got: "_..ResolveCharName(Char),..Source,..CurrentIndex) 
 	
 	do
 	{
-		set Code = $select(Position+1 < $Length(Body):$Extract(Body,Position),1:"0")
+		set Char = $select(Position+1 < $Length(Body):$Extract(Body,Position),1:"0")
 	}
-	while(Code?1N)
+	while(Char?1N)
 	
 	return Position
 }
 
 Method ResolveCharName(Code As %Char, UnicodeString As %String = "") As %Char
 {
-	return:Code=$c(0) "<EOF>"
+	return:Char=$c(0) "<EOF>"
 	return:'..IsNullOrWiteSpace(UnicodeString) UnicodeString
-	return Code
+	return Char
 }
 
 /// https://stackoverflow.com/questions/4731055/whitespace-matching-regex-java
@@ -140,51 +139,51 @@ Method IsNullOrWiteSpace(UnicodeString As %String) As %Boolean
 	return $$$YES
 }
 
-Method IsValidNameCharacter(Code As %Char) As %Boolean
+Method IsValidNameCharacter(Char As %Char) As %Boolean
 {
-	return $Select(Code?1(1A,1"_"):$$$YES, 1:$$$NO)
+	return $Select(Char?1(1A,1"_"):$$$YES, 1:$$$NO)
 }
 
 Method ProcessStringChunks() As %String
 {
 	set ChunksStart = ..CurrentIndex + 1
-	set Code = ..GetCode()
+	set Char = ..GetChar()
 	set Value = ""
 	
-	while (..IfUnicodeGetString() && Code '= $c(10) && Code '= $c(13) && Code '= """")
+	while (..IfUnicodeGetString() && Char '= $c(10) && Char '= $c(13) && Char '= """")
 	{
-		do ..CheckForInvalidCharacters(Code)
-		set Code = ..ProcessCharacter(.Value,.ChunksStart)
+		do ..CheckForInvalidCharacters(Char)
+		set Char = ..ProcessCharacter(.Value,.ChunksStart)
 	}
 	
-	do ..CheckStringTermination(Code)
+	do ..CheckStringTermination(Char)
 	set Value = Value_$Extract(..Source.Body, ChunksStart,..CurrentIndex - ChunksStart)
 	return Value
 }
 
-Method CheckStringTermination(Code)
+Method CheckStringTermination(Char As %Char)
 {
-	do:Code'="""" ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Unterminated string",..Source,..CurrentIndex)
+	throw:Char'="""" ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unterminated string",..Source,..CurrentIndex)
 }
 
 Method ProcessCharacter(ByRef Value As %String, ByRef ChunksStart As %Integer)
 {
-	set Code = ..GetCode()
+	set Char = ..GetChar()
 	set ..CurrentIndex = ..CurrentIndex + 1
 	
-	if (Code = "\")
+	if (Char = "\")
 	{
-		set Value = ..AppendToValueByCode(..AppendCharactersFromLastChunk(Value, ChunksStart), ..GetCode())
+		set Value = ..AppendToValueByCode(..AppendCharactersFromLastChunk(Value, ChunksStart), ..GetChar())
 		set ..CurrentIndex = ..CurrentIndex + 1
 		set ChunksStart = ..CurrentIndex
 	}
 	
-	return ..GetCode()
+	return ..GetChar()
 }
 
-Method AppendToValueByCode(Value As %String, Code As %Char) As %String [ CodeMode = expression ]
+Method AppendToValueByCode(Value As %String, Char As %Char) As %String
 {
-$case(Code,
+	set Case = $case(Char,
 		"""": Value = Value_"""",
 		"/": Value = Value_"/",
 		"\": Value = Value_"\",
@@ -194,14 +193,16 @@ $case(Code,
 		"r": Value = Value_$c(13),
 		"t": Value = Value_$c(9),
 		"u": Value = Value_..GetUnicodeChar(),
-		:##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid character escape sequence: "_Code,..Source,..CurrentIndex))
+		:##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character escape sequence: "_Code,..Source,..CurrentIndex))
+	throw:$IsObject(Case) Case
+	return Case
 }
 
 Method GetUnicodeChar()
 {
 	set Expresion = $Extract(..Source.Body,..CurrentIndex,..CurrentIndex + 5)
-	do:'..OnlyHexInString(Expresion) ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid character escape sequence: "_Expresion,..Source,..CurrentIndex)
-	return $zcvt("\u"_..NextCode()_..NextCode()_..NextCode()_..NextCode(), "I", "JSON")
+	throw:'..OnlyHexInString(Expresion) ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character escape sequence: "_Expresion,..Source,..CurrentIndex)
+	return $zcvt("\u"_..NextChar()_..NextChar()_..NextChar()_..NextChar(), "I", "JSON")
 }
 
 Method AppendCharactersFromLastChunk(Value As %String, ChunksStart As %Integer) As %String [ CodeMode = expression ]
@@ -209,15 +210,15 @@ Method AppendCharactersFromLastChunk(Value As %String, ChunksStart As %Integer) 
 Value_$Extract(..Source.Body, ChunksStart, ..CurrentIndex - ChunksStart - 1)
 }
 
-Method CheckForInvalidCharacters(Code As %Char)
+Method CheckForInvalidCharacters(Char As %Char)
 {
-	if ($ASCII(Code) < 20 && $ASCII(Code) '= 9)
+	if ($ASCII(Char) < 20 && $ASCII(Char) '= 9)
 	{
-		do ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid character within String: "_Code,..Source,..CurrentIndex)
+		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character within String: "_Code,..Source,..CurrentIndex)
 	}
 }
 
-Method NextCode() As %Char
+Method NextChar() As %Char
 {
 	set ..CurrentIndex = ..CurrentIndex + 1
 	if (..IsNotAtTheEndOfQuery()){
@@ -227,7 +228,7 @@ Method NextCode() As %Char
 	}
 }
 
-Method GetCode() As %Char
+Method GetChar() As %Char
 {
 	if (..IfUnicodeGetString()){
 		return $Extract(..Source.Body,..CurrentIndex)
@@ -262,7 +263,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 		{
 			set Position = Position + 1
 			break
-		}elseif (char = "#"){
+		}elseif (Char = "#"){
 			set position = ..WaitForEndOfComment(Body, Position, Char) 
 			break
 		}else {
@@ -272,17 +273,19 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 	return Position
 }
 
-Method WaitForEndOfComment(Body As %String, Position As %Integer, Code As %Char) As %Integer
+Method WaitForEndOfComment(Body As %String, Position As %Integer, Char As %Char) As %Integer
 {
-	while((Position < $Length(Body)) && Code '=0 && ($Ascii(Code) > 31 || Code = $c(9)) && Code '=$c(10) && Code '=$c(13))
+	while((Position < $Length(Body)) && Char '="" && ($Ascii(Char) > 31 || Char = $c(9)) && Char '=$c(10) && Char '=$c(13))
 	{
 		set Position = Position + 1
+		set Char = $Extract(Body, Position)
 	}
+	return Position
 }
 
-Method CheckForPunctuationTokens(Code As %Char) As Token [ CodeMode = expression ]
+Method CheckForPunctuationTokens(Char As %Char) As Token [ CodeMode = expression ]
 {
-$case(Code,
+$case(Char,
 	"!": ..CreatePunctuationToken($$$BANG, 1),
 	"$": ..CreatePunctuationToken($$$DOLLAR, 1),
 	"(": ..CreatePunctuationToken($$$PARENL, 1),
@@ -348,7 +351,7 @@ Method ValidateCharacterCode(Code As %Integer)
 	set Code = $ASCII(Code)
 	if (Code < 20 && Code '= 9 && Code '= 10 && Code '= 13)
 	{
-		do ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).%New("Invalid character: "_$c(Code),..Source,..CurrentIndex)
+		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character: "_$c(Code),..Source,..CurrentIndex)
 	}
 }
 
