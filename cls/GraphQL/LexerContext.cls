@@ -259,7 +259,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 	{
 		set Char = $Extract(Body, Position)
 		
-		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) ||(Char = $c(13)) ||(Char = ",")  || (Char = $c(239,187,191))) 
+		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) ||(Char = $c(13)) ||(Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position+1) =$c(187)) && ($Extract(Body, Position+2) =$c(191)))) 
 		{
 			set Position = Position + 1
 			break
@@ -346,9 +346,9 @@ Method OnlyHexInString(Text As %String) As %Boolean
 	return $Match(Text,"\A\b[0-9a-fA-F]+\b\Z")
 }
 
-Method ValidateCharacterCode(Code As %Integer)
+Method ValidateCharacterCode(Char As %Integer)
 {
-	set Code = $ASCII(Code)
+	set Code = $ASCII(Char)
 	if (Code < 20 && Code '= 9 && Code '= 10 && Code '= 13)
 	{
 		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character: "_$c(Code),..Source,..CurrentIndex)
