@@ -346,7 +346,7 @@ Method OnlyHexInString(Text As %String) As %Boolean
 	return $Match(Text,"\A\b[0-9a-fA-F]+\b\Z")
 }
 
-Method ValidateCharacterCode(Char As %Integer)
+Method ValidateCharacterCode(Char As %Char)
 {
 	set Code = $ASCII(Char)
 	if (Code < 20 && Code '= 9 && Code '= 10 && Code '= 13)

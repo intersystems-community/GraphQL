@@ -9,5 +9,17 @@ Property Arguments As list Of GraphQLInputValueDefinition;
 
 Property Directives As list Of GraphQLDirective;
 
+Method %OnNew(Name As GraphQLName, Type As GraphQLType, Arguments As %ListOfObjectsWithClassName, Directives As %ListOfObjectsWithClassName, Location As GraphQLLocation) As %Status
+{
+	set ..Name = Name
+	set ..Type = Type
+	Set ..Location = Location
+	
+	do ##class(GraphQL.Utils).SetCollection(..Arguments, Arguments)
+	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
+	
+	return $$$OK
+}
+
 }
 

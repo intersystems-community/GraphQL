@@ -7,5 +7,16 @@ Property Fields As list Of GraphQLInputValueDefinition;
 
 Property Name As GraphQLName;
 
+Method %OnNew(Name As GraphQLName, Directives As %ListOfObjectsWithClassName, Fields As %ListOfObjectsWithClassName, Location As GraphQLLocation) As %Status
+{
+	set ..Name = Name
+	set ..Location =  Location
+	
+	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
+	do ##class(GraphQL.Utils).SetCollection(..Fields, Fields)
+
+	return $$$OK
+}
+
 }
 

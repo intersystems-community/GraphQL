@@ -3,9 +3,10 @@ Class GraphQL.AST.ASTNode Extends %Base [ Abstract ]
 
 Property Kind;
 
+Property Location As GraphQLLocation;
+
 Method KindGet()
 {
-	#define NameKind "Name"
 	#define ASTNodeKind "Node"
 	
 	set class = ..%ClassName(1)
@@ -16,17 +17,6 @@ Method KindGet()
 	}
 	
 	q result
-}
-
-// Property Kind As %String(VALUELIST = ",Name,Document,OperationDefinition,VariableDefinition,Variable,SelectionSet,Field,Argument,FragmentSpread,InlineFragment,FragmentDefinition,IntValue,FloatValue,StringValue,BooleanValue,EnumValue,ListValue,ObjectValue,ObjectField,Directive,NamedType,ListType,NonNullType,SchemaDefinition,OperationTypeDefinition,ScalarTypeDefinition,ObjectTypeDefinition,FieldDefinition,InputValueDefinition,InterfaceTypeDefinition,UnionTypeDefinition,EnumTypeDefinition,EnumValueDefinition,InputObjectTypeDefinition,TypeExtensionDefinition,DirectiveDefinition");
-
-Property Location As GraphQLLocation;
-
-ClassMethod a()
-{
-	#define NameKind "Name"
-	
-	set obj = $$$NameKind
 }
 
 }

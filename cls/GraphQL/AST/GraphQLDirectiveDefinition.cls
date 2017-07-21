@@ -9,5 +9,14 @@ Property Locations As list Of GraphQLName;
 
 Property Name As GraphQLName;
 
+Method %OnNew(Name As GraphQLName, Arguments As %ListOfObjectsWithClassName, Locations As %ListOfObjectsWithClassName, Location As GraphQLLocation) As %Status
+{
+	set ..Name = Name
+	set ..Location = Location
+	do ##class(GraphQL.Utils).SetCollection(..Arguments, Arguments)
+	do ##class(GraphQL.Utils).SetCollection(..Locations, Locations)
+	return $$$OK
+}
+
 }
 

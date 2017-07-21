@@ -7,7 +7,7 @@ Property VariableDefinitions As list Of GraphQLVariableDefinition;
 
 Property Name As GraphQLName;
 
-Property Operation As %String(VALUELIST = "Query,Mutation,Subscription");
+Property Operation;
 
 Property SelectionSet As GraphQLSelectionSet;
 
