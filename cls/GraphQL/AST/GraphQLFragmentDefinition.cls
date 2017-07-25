@@ -1,5 +1,11 @@
-Class GraphQL.AST.GraphQLFragmentDefinition Extends GraphQLInlineFragment
+Class GraphQL.AST.GraphQLFragmentDefinition Extends ASTNode
 {
+
+Property Directives As list Of GraphQLDirective;
+
+Property SelectionSet As GraphQLSelectionSet;
+
+Property TypeCondition As GraphQLNamedType;
 
 Property Name As GraphQLName;
 

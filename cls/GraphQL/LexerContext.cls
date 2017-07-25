@@ -244,10 +244,10 @@ Method IsNotAtTheEndOfQuery() As %Boolean [ CodeMode = expression ]
 
 Method CreateEOFToken() As Token
 {
-	set Token = ##class(Token).%New()
-	set Token.Start = ..CurrentIndex
-	set Token.End = ..CurrentIndex
-	set Token.Kind = $$$EOF
+	set Start = ..CurrentIndex
+	set End = ..CurrentIndex
+	set Kind = $$$EOF
+	set Token = ##class(Token).%New(Start,End,Kind)
 	return Token
 }
 
