@@ -1,0 +1,5 @@
+ROUTINE t
+	set lexer = ##class(GraphQL.Lexer).%New()
+	set parser = ##class(GraphQL.Parser).%New(lexer)
+	set ast = parser.Parse(##class(GraphQL.Source).%New("{ query { field } }"))
+	zw ast

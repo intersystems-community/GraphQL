@@ -1,6 +1,6 @@
 Include Tokens
 
-Class GraphQL.Token
+Class GraphQL.Token Extends %RegisteredObject
 {
 
 Property Start As %Integer;

@@ -1,6 +1,6 @@
 Include Tokens
 
-Class GraphQL.ParserContext
+Class GraphQL.ParserContext Extends %RegisteredObject
 {
 
 Property CurrentToken As Token;
@@ -16,7 +16,7 @@ Method %OnNew(Source As Source, Lexer As Lexer) As %Status
 	set ..CurrentToken = ..Lexer.Lex(Source)
 }
 
-Method Pars() As GraphQL.AST.GraphQLDocument [ CodeMode = expression ]
+Method Parse() As GraphQL.AST.GraphQLDocument [ CodeMode = expression ]
 {
 ..ParseDocument()
 }

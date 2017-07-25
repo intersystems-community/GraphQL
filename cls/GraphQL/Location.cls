@@ -1,4 +1,4 @@
-Class GraphQL.Location
+Class GraphQL.Location Extends %RegisteredObject
 {
 
 Property Line As %Integer;

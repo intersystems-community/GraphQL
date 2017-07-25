@@ -1,6 +1,6 @@
 Include Tokens
 
-Class GraphQL.LexerContext
+Class GraphQL.LexerContext Extends %RegisteredObject
 {
 
 Property CurrentIndex As %Integer;
@@ -335,10 +335,11 @@ Method CheckForSpreadOperator() As Token
 
 Method IfUnicodeGetString() As %String
 {
-	if (($Length(..Source.Body) > ..CurrentIndex + 5) && ..OnlyHexInString($Extract(..Source.Body,..CurrentIndex + 2, ..CurrentIndex + 6)))
+	if (($Length(..Source.Body) > ..CurrentIndex + 5) && '..OnlyHexInString($Extract(..Source.Body,..CurrentIndex + 2, ..CurrentIndex + 6)))
 	{
 		return $Extract(..Source.Body,..CurrentIndex,..CurrentIndex + 6)
 	}
+	return $$$NULL
 }
 
 Method OnlyHexInString(Text As %String) As %Boolean
