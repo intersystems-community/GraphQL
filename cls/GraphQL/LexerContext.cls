@@ -230,7 +230,7 @@ Method NextChar() As %Char
 
 Method GetChar() As %Char
 {
-	if (..IfUnicodeGetString()){
+	if (..IsNotAtTheEndOfQuery()){
 		return $Extract(..Source.Body,..CurrentIndex)
 	}else{
 		return "0"
@@ -259,7 +259,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 	{
 		set Char = $Extract(Body, Position)
 		
-		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) ||(Char = $c(13)) ||(Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position+1) =$c(187)) && ($Extract(Body, Position+2) =$c(191)))) 
+		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) ||(Char = $c(13)) ||(Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position+1) = $c(187)) && ($Extract(Body, Position+2) = $c(191)))) 
 		{
 			set Position = Position + 1
 			break
@@ -307,19 +307,28 @@ Method CreatePunctuationToken(Kind, Offset As %Integer) As Token [ CodeMode = ex
 ##class(Token).%New(..CurrentIndex, ..CurrentIndex + Offset, Kind, 0)
 }
 
-Method CreateFloatToken(Start As %Integer) As Token [ CodeMode = expression ]
+Method CreateFloatToken(Start As %Integer) As Token
 {
-##class(Token).%New(Start, ..CurrentIndex, $$$FLOAT, $Extract(..Source.Body,Start,..CurrentIndex - Start))
+	set End = ..CurrentIndex
+	set Kind = $$$FLOAT
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
-Method CreateIntToken(Start As %Integer) As Token [ CodeMode = expression ]
+Method CreateIntToken(Start As %Integer) As Token
 {
-##class(Token).%New(Start, ..CurrentIndex, $$$INT, $Extract(..Source.Body,Start,..CurrentIndex - Start))
+	set End = ..CurrentIndex
+	set Kind = $$$INT
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
-Method CreateNameToken(Start As %Integer) As Token [ CodeMode = expression ]
+Method CreateNameToken(Start As %Integer) As Token
 {
-##class(Token).%New(Start, ..CurrentIndex, $$$NAME, $Extract(..Source.Body,Start,..CurrentIndex - Start))
+	set End = ..CurrentIndex
+	set Kind = $$$NAME
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
 Method CheckForSpreadOperator() As Token
@@ -350,7 +359,7 @@ Method OnlyHexInString(Text As %String) As %Boolean
 Method ValidateCharacterCode(Char As %Char)
 {
 	set Code = $ASCII(Char)
-	if (Code < 20 && Code '= 9 && Code '= 10 && Code '= 13)
+	if ((Code < 20) && (Code '= 9) && (Code '= 10) && (Code '= 13))
 	{
 		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character: "_$c(Code),..Source,..CurrentIndex)
 	}

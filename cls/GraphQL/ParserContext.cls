@@ -14,6 +14,7 @@ Method %OnNew(Source As Source, Lexer As Lexer) As %Status
 	set ..Source = Source
 	set ..Lexer = Lexer
 	set ..CurrentToken = ..Lexer.Lex(Source)
+	return $$$OK
 }
 
 Method Parse() As GraphQL.AST.GraphQLDocument [ CodeMode = expression ]
