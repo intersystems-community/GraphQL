@@ -11,7 +11,7 @@ Property Value As %String;
 
 Property Kind;
 
-Method %OnNew(Start As %Integer, End As %Integer, Kind, Value As %String = "") As %Status
+Method %OnNew(Start As %Integer, End As %Integer, Kind, Value As %String = {$$$NULL}) As %Status
 {
 	set ..Start = Start
 	set ..End = End

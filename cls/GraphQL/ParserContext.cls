@@ -407,7 +407,7 @@ Method Skip(Kind) As %Boolean
 
 Method Advance() [ CodeMode = expression ]
 {
-..CurrentToken = ..Lexer.Lex(..Source,..CurrentToken.Kind)
+..CurrentToken = ..Lexer.Lex(..Source,..CurrentToken.End)
 }
 
 Method Expect(Kind)
@@ -671,7 +671,7 @@ Method ParseDirectiveDefinition() As GraphQL.AST.GraphQLDirectiveDefinition
 
 Method ParseArgumentDefs() As %ListOfObjectsWithClassName
 {
-	#dim GQLInputValueDefinition As List of GraphQL.AST.GraphQLInputValueDefinition
+	#dim GQLInputValueDefinition As List of GraphQL.AST.GraphQLInputValueDefinition = ##class(%ListOfObjectsWithClassName).%New()
 	if ('..Peek($$$PARENL))
 	{
 		return GQLInputValueDefinition

@@ -30,11 +30,11 @@ Method GetToken() As Token
 	
 	set Token = ..CheckForPunctuationTokens(Char)
 	
-	return:Token'="" Token
+	return:$IsObject(Token) Token
 	
 	return:Char?1(1A,1"_") ..ReadName() 
 	
-	return:Char?1(1A,1"-") ..ReadNumber() 
+	return:Char?1(1N,1"-") ..ReadNumber() 
 	
 	return:Char="""" ..ReadString()
 }
@@ -247,7 +247,7 @@ Method CreateEOFToken() As Token
 	set Start = ..CurrentIndex
 	set End = ..CurrentIndex
 	set Kind = $$$EOF
-	set Token = ##class(Token).%New(Start,End,Kind)
+	set Token = ##class(Token).%New(Start, End, Kind)
 	return Token
 }
 
@@ -304,14 +304,14 @@ $case(Char,
 
 Method CreatePunctuationToken(Kind, Offset As %Integer) As Token [ CodeMode = expression ]
 {
-##class(Token).%New(..CurrentIndex, ..CurrentIndex + Offset, Kind, 0)
+##class(Token).%New(..CurrentIndex, ..CurrentIndex + Offset, Kind, $$$NULL)
 }
 
 Method CreateFloatToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$FLOAT
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 1)
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
@@ -319,7 +319,7 @@ Method CreateIntToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$INT
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 1)
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
@@ -327,7 +327,7 @@ Method CreateNameToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$NAME
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - Start)
+	set Value = $Extract(..Source.Body, Start, ..CurrentIndex - 1)
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
@@ -344,9 +344,9 @@ Method CheckForSpreadOperator() As Token
 
 Method IfUnicodeGetString() As %String
 {
-	if (($Length(..Source.Body) > ..CurrentIndex + 5) && '..OnlyHexInString($Extract(..Source.Body,..CurrentIndex + 2, ..CurrentIndex + 6)))
+	if (($Length(..Source.Body) > ..CurrentIndex + 5) && ..OnlyHexInString($Extract(..Source.Body,..CurrentIndex + 2, ..CurrentIndex + 5)))
 	{
-		return $Extract(..Source.Body,..CurrentIndex,..CurrentIndex + 6)
+		return $Extract(..Source.Body,..CurrentIndex,..CurrentIndex + 5)
 	}
 	return $$$NULL
 }
