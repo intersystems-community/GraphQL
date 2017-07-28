@@ -262,10 +262,8 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) || (Char = $c(13)) || (Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position + 1) = $c(187)) && ($Extract(Body, Position + 2) = $c(191)))) 
 		{
 			set Position = Position + 1
-			break
 		}elseif (Char = "#"){
 			set position = ..WaitForEndOfComment(Body, Position, Char) 
-			break
 		}else {
 			return Position
 		}

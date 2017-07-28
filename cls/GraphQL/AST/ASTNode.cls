@@ -1,4 +1,4 @@
-Class GraphQL.AST.ASTNode Extends (%Base, %RegisteredObject) [ Abstract ]
+Class GraphQL.AST.ASTNode Extends %RegisteredObject
 {
 
 Property Kind;
