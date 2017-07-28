@@ -50,8 +50,6 @@ Method CreateDocument(Start As %Integer, Definitions As %ListOfObjectsWithClassN
 	return ##class(GraphQL.AST.GraphQLDocument).%New(Location,Definitions)
 }
 
-// here
-
 Method ParseDefinition() As GraphQL.AST.ASTNode
 {
 	if (..Peek($$$BRACEL))
@@ -338,7 +336,7 @@ Method ParseList(IsConstant As %Boolean) As GraphQL.AST.GraphQLValue
 	set Value = $$$NO		//done
 	
 	set Location = ..GetLocation(Start)
-	set AstValue = $Extract(..Source.Body,Start,..CurrentToken.End - Start - 1)
+	set AstValue = $Extract(..Source.Body,Start,..CurrentToken.End - 1)
 	set Values = ..Any($$$BRACKETL,"ParseValueLiteral", $$$BRACKETR, $Select(IsConstant:Constant, 1:Value))
 	
 	return ##class(GraphQL.AST.GraphQLListValue).%New($$$ListValue, Location, AstValue, Values)

@@ -60,9 +60,9 @@ Method ReadNumber() As Token
 	set Char = $Extract(..Source.Body, Start)
 	
 	if (Char = "-") set Char = ..NextChar()
-	set NextChar = $Select(Char="0":..NextChar(),1:..ReadDigitsFromOwnSource(Char))
+	set NextChar = $Select(Char = "0": ..NextChar(), 1: ..ReadDigitsFromOwnSource(Char))
 	
-	if ($Ascii(NextChar) >= 48 && $Ascii(NextChar) <= 57)
+	if (($Ascii(NextChar) >= 48) && ($Ascii(NextChar) <= 57))
 	{
 		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, unexpected digit after "_Char_": "_NextChar,..Source,..CurrentIndex)
 	}
@@ -90,12 +90,12 @@ Method ReadString() As Token
 {
 	set Start = ..CurrentIndex
 	Set Value = ..ProcessStringChunks()
-	return ##class(Token).%OnNew(Start,..CurrentIndex + 1, $$$STRING, Value)
+	return ##class(Token).%New(Start,..CurrentIndex + 1, $$$STRING, Value)
 }
 
 Method ReadDigitsFromOwnSource(Char As %Char) As %Char
 {
-	set ..CurrentIndex = ..ReadDigits(..Source,..CurrentIndex,Char)
+	set ..CurrentIndex = ..ReadDigits(..Source, ..CurrentIndex, Char)
 	set Char = ..GetChar()
 	return Char
 }
@@ -106,13 +106,14 @@ Method ReadDigits(Source As Source, Start As %Integer, FirstChar As %Char) As %I
 	set Position = Start
 	set Char = FirstChar
 	
-	throw:'Char?1N ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, expected digit but got: "_..ResolveCharName(Char),..Source,..CurrentIndex) 
+	throw:'(Char?1N) ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, expected digit but got: "_..ResolveCharName(Char),..Source,..CurrentIndex) 
 	
 	do
 	{
-		set Char = $select(Position+1 < $Length(Body):$Extract(Body,Position),1:"0")
+		set Position = Position + 1
+		set Char = $select(Position < $Length(Body): $Extract(Body, Position), 1: $$$NULL)
 	}
-	while(Char?1N)
+	while((Char?1N))
 	
 	return Position
 }
@@ -289,7 +290,7 @@ $case(Char,
 	"(": ..CreatePunctuationToken($$$PARENL, 1),
 	")": ..CreatePunctuationToken($$$PARENR, 1),
 	".": ..CheckForSpreadOperator(),
-	":": ..CreatePunctuationToken($$$SPREAD, 1),
+	":": ..CreatePunctuationToken($$$COLON, 1),
 	"=": ..CreatePunctuationToken($$$EQUALS, 1),
 	"@": ..CreatePunctuationToken($$$AT, 1),
 	"[": ..CreatePunctuationToken($$$BRACKETL, 1),
@@ -309,7 +310,7 @@ Method CreateFloatToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$FLOAT
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 1)
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 2)
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
@@ -317,7 +318,7 @@ Method CreateIntToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$INT
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 1)
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 2) //Нужно понять почему -2 а не -1...
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 
