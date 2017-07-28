@@ -60,7 +60,8 @@ Method ParseDefinition() As GraphQL.AST.ASTNode
 	}
 	if (..Peek($$$NAME))
 	{
-		return $Select(..ParseNamedDefinition() '= $$$NULL: ..ParseNamedDefinition(), 1:$$$NULL)
+		set ParseNamedDefinition = ..ParseNamedDefinition()
+		return $Get(ParseNamedDefinition)
 	}
 	throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unexpected "_..CurrentToken_": "_NextChar,..Source,..CurrentToken.Start)
 }
@@ -93,11 +94,11 @@ Method CreateOperationDefinition(Start As %Integer, Operation As %Integer = {$$$
 		set Definition.Directives = ..ParseDirectives()	
 		set Definition.SelectionSet = ..ParseSelectionSet()
 		set Definition.Location = ..GetLocation(Start)
-		return Definition
+	}else{
+		set Definition.Operation = $$$QUERY
+		set Definition.SelectionSet = ..ParseSelectionSet()
+		set Definition.Location = ..GetLocation(Start)
 	}
-	set Definition.Operation = $$$QUERY
-	set Definition.SelectionSet = ..ParseSelectionSet()
-	set Definition.Location = ..GetLocation(Start)
 	return Definition
 }
 
@@ -182,12 +183,12 @@ Method GetTypeCondition() As GraphQL.AST.GraphQLNamedType
 
 Method ParseDirectives() As %ListOfObjectsWithClassName
 {
-	set Directivs = ##class(%ListOfObjectsWithClassName).%New()
+	set Directives = ##class(%ListOfObjectsWithClassName).%New()
 	while(..Peek($$$AT))
 	{
-		do Directivs.Insert(..ParseDirective())
+		do Directives.Insert(..ParseDirective())
 	}
-	return Directivs
+	return Directives
 }
 
 Method ParseDirective() As GraphQL.AST.GraphQLDirective
@@ -405,9 +406,9 @@ Method Skip(Kind) As %Boolean
 	return IsCurrentTokenMathing
 }
 
-Method Advance() [ CodeMode = expression ]
+Method Advance()
 {
-..CurrentToken = ..Lexer.Lex(..Source,..CurrentToken.End)
+	set ..CurrentToken = ..Lexer.Lex(..Source,..CurrentToken.End)
 }
 
 Method Expect(Kind)
@@ -416,7 +417,9 @@ Method Expect(Kind)
 	{
 		do ..Advance()
 	}else{
-		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Expected "_##class(Token).GetTokenKindDescription(Kind)_" "_..CurrentToken,..Source)
+		set ExpectedKind = ##class(Token).GetTokenKindDescription(Kind)
+		set ReceivedKind = ##class(Token).GetTokenKindDescription(..CurrentToken.Kind)
+		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Expected:'"_ExpectedKind_"' Received:'"_ReceivedKind_"' Location:",..Source, ..GetLocation(..CurrentToken.Start))
 	}
 }
 
@@ -682,11 +685,12 @@ Method ParseArgumentDefs() As %ListOfObjectsWithClassName
 Method Many(Open As %Integer, Next As %String, Close As %Integer) As %ListOfObjectsWithClassName
 {
 	do ..Expect(Open)
-	#dim Nodes As %ListOfObjectsWithClassName = $Method(,Next)
-	while ('..Skip(Close))
-	{
+	#dim Nodes As %ListOfObjectsWithClassName = ##class(%ListOfObjectsWithClassName).%New()
+	
+	do{
 		do Nodes.Insert($Method(,Next))
-	}
+	}while ('..Skip(Close))
+
 	return Nodes
 }
 

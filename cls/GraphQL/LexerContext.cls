@@ -20,12 +20,12 @@ Method GetToken() As Token
 	
 	set ..CurrentIndex = ..GetPositionAfterWhitespace(..Source.Body, ..CurrentIndex)
 	
-	if (..CurrentIndex >= $Length(..Source.Body)) return ..CreateEOFToken()
+	if (..CurrentIndex > $Length(..Source.Body)) return ..CreateEOFToken()
 	
 	set Unicode = ..IfUnicodeGetString()
 	
 	set Char = $Extract(..Source.Body,..CurrentIndex)
-	
+		
 	do ..ValidateCharacterCode(Char)
 	
 	set Token = ..CheckForPunctuationTokens(Char)
@@ -132,16 +132,16 @@ Method IsNullOrWiteSpace(UnicodeString As %String) As %Boolean
 	//write $listfind(whitespacesOrNullList, $ascii(char))
 	for i=1:1:$Length(UnicodeString)
 	{
-		set Char = $Extract(UnicodeString,I)
+		set Char = $Extract(UnicodeString,i)
 		set Code = $Ascii(Char)
 		return:'$ListFind(whitespacesOrNullList,Code) $$$NO
 	}
 	return $$$YES
 }
 
-Method IsValidNameCharacter(Char As %Char) As %Boolean
+Method IsValidNameCharacter(Char As %Char) As %Boolean [ CodeMode = expression ]
 {
-	return $Select(Char?1(1A,1"_"):$$$YES, 1:$$$NO)
+$Select(Char?1(1A,1"_"):$$$YES, 1:$$$NO)
 }
 
 Method ProcessStringChunks() As %String
@@ -150,7 +150,7 @@ Method ProcessStringChunks() As %String
 	set Char = ..GetChar()
 	set Value = ""
 	
-	while (..IfUnicodeGetString() && Char '= $c(10) && Char '= $c(13) && Char '= """")
+	while (..IfUnicodeGetString() && (Char '= $c(10)) && (Char '= $c(13)) && (Char '= """"))
 	{
 		do ..CheckForInvalidCharacters(Char)
 		set Char = ..ProcessCharacter(.Value,.ChunksStart)
@@ -224,7 +224,7 @@ Method NextChar() As %Char
 	if (..IsNotAtTheEndOfQuery()){
 		return $Extract(..Source.Body,..CurrentIndex)
 	}else{
-		return "0"
+		return $$$NULL
 	}
 }
 
@@ -233,13 +233,13 @@ Method GetChar() As %Char
 	if (..IsNotAtTheEndOfQuery()){
 		return $Extract(..Source.Body,..CurrentIndex)
 	}else{
-		return "0"
+		return $$$NULL
 	}
 }
 
 Method IsNotAtTheEndOfQuery() As %Boolean [ CodeMode = expression ]
 {
-..CurrentIndex < $Length(..Source.Body)
+..CurrentIndex <= $Length(..Source.Body)
 }
 
 Method CreateEOFToken() As Token
@@ -259,7 +259,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 	{
 		set Char = $Extract(Body, Position)
 		
-		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) ||(Char = $c(13)) ||(Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position+1) = $c(187)) && ($Extract(Body, Position+2) = $c(191)))) 
+		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) || (Char = $c(13)) || (Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position + 1) = $c(187)) && ($Extract(Body, Position + 2) = $c(191)))) 
 		{
 			set Position = Position + 1
 			break
