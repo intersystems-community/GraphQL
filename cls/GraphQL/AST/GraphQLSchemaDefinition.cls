@@ -9,8 +9,8 @@ Method %OnNew(Directives As %ListOfObjectsWithClassName, OperationTypes As %List
 {
 	set ..Location = Location
 	
-	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
-	do ##class(GraphQL.Utils).SetCollection(..OperationTypes, OperationTypes)
+	do ##class(GraphQL.Utils.Collection).Set(..Directives, Directives)
+	do ##class(GraphQL.Utils.Collection).Set(..OperationTypes, OperationTypes)
 
 	return $$$OK
 }

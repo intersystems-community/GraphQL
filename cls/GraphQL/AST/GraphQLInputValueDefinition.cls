@@ -16,7 +16,7 @@ Method %OnNew(Name As GraphQLName, Type As GraphQLType, DefaultValue As GraphQLV
 	set ..DefaultValue = DefaultValue
 	set ..Location = Location
 	
-	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
+	do ##class(GraphQL.Utils.Collection).Set(..Directives, Directives)
 
 	return $$$OK
 }

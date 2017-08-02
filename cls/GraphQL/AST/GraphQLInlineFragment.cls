@@ -13,7 +13,7 @@ Method %OnNew(TypeCondition As GraphQLNamedType, Directives As %ListOfObjectsWit
 	set ..SelectionSet = SelectionSet
 	set ..Location = Location
 	
-	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
+	do ##class(GraphQL.Utils.Collection).Set(..Directives, Directives)
 	
 	return $$$OK
 }

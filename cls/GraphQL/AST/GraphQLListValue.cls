@@ -12,7 +12,7 @@ Method %OnNew(KindField As %String, Location As %Integer, AstValue As %String, V
 	set ..KindField = KindField
 	set ..Location = Location
 	set ..AstValue = AstValue
-	do ##class(GraphQL.Utils).SetCollection(..Values, Values)
+	do ##class(GraphQL.Utils.Collection).Set(..Values, Values)
 	quit $$$OK
 }
 

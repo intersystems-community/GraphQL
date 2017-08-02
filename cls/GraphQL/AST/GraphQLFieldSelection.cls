@@ -17,8 +17,8 @@ Method %OnNew(Name As GraphQLName, Alias As GraphQLName = "", Arguments As %List
 	set ..Alias = Alias
 	set ..Location = Location
 	
-	do ##class(GraphQL.Utils).SetCollection(..Arguments, Arguments)
-	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
+	do ##class(GraphQL.Utils.Collection).Set(..Arguments, Arguments)
+	do ##class(GraphQL.Utils.Collection).Set(..Directives, Directives)
 	set:SelectionSet'="" ..SelectionSet = SelectionSet 
 	
 	return $$$OK

@@ -12,8 +12,8 @@ Method %OnNew(Name As GraphQLName, Directives As %ListOfObjectsWithClassName, Fi
 	set ..Name = Name
 	set ..Location =  Location
 	
-	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
-	do ##class(GraphQL.Utils).SetCollection(..Fields, Fields)
+	do ##class(GraphQL.Utils.Collection).Set(..Directives, Directives)
+	do ##class(GraphQL.Utils.Collection).Set(..Fields, Fields)
 
 	return $$$OK
 }

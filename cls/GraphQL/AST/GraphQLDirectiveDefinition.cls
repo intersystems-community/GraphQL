@@ -13,8 +13,8 @@ Method %OnNew(Name As GraphQLName, Arguments As %ListOfObjectsWithClassName, Loc
 {
 	set ..Name = Name
 	set ..Location = Location
-	do ##class(GraphQL.Utils).SetCollection(..Arguments, Arguments)
-	do ##class(GraphQL.Utils).SetCollection(..Locations, Locations)
+	do ##class(GraphQL.Utils.Collection).Set(..Arguments, Arguments)
+	do ##class(GraphQL.Utils.Collection).Set(..Locations, Locations)
 	return $$$OK
 }
 
