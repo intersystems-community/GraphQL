@@ -1,8 +1,9 @@
-Class GraphQL.AST.ASTNode Extends %RegisteredObject
+Class GraphQL.AST.ASTNode Extends (%RegisteredObject, GraphQL.Utils.Hash)
 {
 
 Property Kind;
 
+/// @DoNotHash
 Property Location As GraphQLLocation;
 
 Method KindGet()

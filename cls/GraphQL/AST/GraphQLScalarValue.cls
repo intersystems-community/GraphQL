@@ -3,6 +3,7 @@ Class GraphQL.AST.GraphQLScalarValue Extends GraphQLValue
 
 Property KindField As %Integer;
 
+/// @DoNotHash
 Property Value As %String;
 
 Method %OnNew(Kind As %Integer, Value As %String, Location As GraphQLLocation) As %Status

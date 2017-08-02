@@ -19,7 +19,7 @@ Method %OnNew(Name As GraphQLName, Alias As GraphQLName = "", Arguments As %List
 	
 	do ##class(GraphQL.Utils).SetCollection(..Arguments, Arguments)
 	do ##class(GraphQL.Utils).SetCollection(..Directives, Directives)
-	set ..SelectionSet = SelectionSet 
+	set:SelectionSet'="" ..SelectionSet = SelectionSet 
 	
 	return $$$OK
 }
