@@ -133,7 +133,7 @@ Method IsNullOrWiteSpace(UnicodeString As %String) As %Boolean
 	//write $listfind(whitespacesOrNullList, $ascii(char))
 	for i=1:1:$Length(UnicodeString)
 	{
-		set Char = $Extract(UnicodeString,i)
+		set Char = $Extract(UnicodeString, i)
 		set Code = $Ascii(Char)
 		return:'$ListFind(whitespacesOrNullList,Code) $$$NO
 	}
@@ -147,18 +147,19 @@ $Select(Char?1(1A,1"_"):$$$YES, 1:$$$NO)
 
 Method ProcessStringChunks() As %String
 {
-	set ChunksStart = ..CurrentIndex + 1
+	set ..CurrentIndex = ..CurrentIndex + 1
+	set ChunksStart = ..CurrentIndex
 	set Char = ..GetChar()
 	set Value = ""
 	
-	while (..IfUnicodeGetString() && (Char '= $c(10)) && (Char '= $c(13)) && (Char '= """"))
+	while (..IsNotAtTheEndOfQuery() && (Char '= $c(10)) && (Char '= $c(13)) && (Char '= """"))
 	{
 		do ..CheckForInvalidCharacters(Char)
 		set Char = ..ProcessCharacter(.Value,.ChunksStart)
 	}
 	
 	do ..CheckStringTermination(Char)
-	set Value = Value_$Extract(..Source.Body, ChunksStart,..CurrentIndex - ChunksStart)
+	set Value = Value_$Extract(..Source.Body, ChunksStart, ..CurrentIndex - 1)
 	return Value
 }
 
@@ -167,7 +168,7 @@ Method CheckStringTermination(Char As %Char)
 	throw:Char'="""" ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unterminated string",..Source,..CurrentIndex)
 }
 
-Method ProcessCharacter(ByRef Value As %String, ByRef ChunksStart As %Integer)
+Method ProcessCharacter(ByRef Value As %String, ByRef ChunksStart As %Integer) As %Char
 {
 	set Char = ..GetChar()
 	set ..CurrentIndex = ..CurrentIndex + 1
@@ -213,7 +214,7 @@ Value_$Extract(..Source.Body, ChunksStart, ..CurrentIndex - ChunksStart - 1)
 
 Method CheckForInvalidCharacters(Char As %Char)
 {
-	if ($ASCII(Char) < 20 && $ASCII(Char) '= 9)
+	if (($ASCII(Char) < 20) && ($ASCII(Char) '= 9))
 	{
 		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid character within String: "_Code,..Source,..CurrentIndex)
 	}
