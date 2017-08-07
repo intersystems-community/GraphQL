@@ -5,12 +5,12 @@ Class GraphQL.Query.Test
 ClassMethod Test()
 {
 	set result = ..Execute()
-	do result.$toJSON()
+	do result.%ToJSON()
 }
 
 /// query{sample_person{Name}}
 /// query{sample_person{Name Home {City}}
-ClassMethod Execute() As %Object
+ClassMethod Execute() As %DynamicObject
 {
 	set data = []
 	
@@ -25,7 +25,7 @@ ClassMethod Execute() As %Object
 	&sql(FETCH C1)
 
 	While (SQLCODE = 0) {
-		do data.$push({"name":name})
+		do data.%Push({"name":(name)})
 		&sql(FETCH C1)
 	}
 
