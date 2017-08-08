@@ -10,11 +10,12 @@ XData UrlMap
 
 ClassMethod GraphQL()
 {
-	//do ##class(%CSP.Utils).DisplayAllObjects()
-	//q 1
-	Set Stream = ##class(%Stream.FileCharacter).%New()
-	do Stream.LinkToFile("C:\Users\gevor\Desktop\graphiql-0.11.2\example\graphql")
-	do Stream.OutputToDevice()
+	// Set Stream = ##class(%Stream.FileCharacter).%New()
+	// do Stream.LinkToFile("C:\Users\gevor\Desktop\graphiql-0.11.2\example\graphql")
+	// do Stream.OutputToDevice()
+	set s=##class(GraphQL.Utils.Schema).GetSchema()
+	w s.%ToJSON()
+	
 	q 1
 }
 
