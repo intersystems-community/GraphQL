@@ -1,3 +1,5 @@
+Include Tokens
+
 Class GraphQL.Utils.Schema [ Abstract ]
 {
 
@@ -12,28 +14,157 @@ ClassMethod GetSchema() As %DynamicObject
 		set classname =  rs.Name
 		continue:$e(classname)="%"
 		continue:$$$defClassKeyGet(classname, $$$cCLASSsystem)'=0 // Skip system classes
-		//write classname ,!
 		
-		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
-		for i=1:1:class.Properties.Count() {
-			#dim prop As %Dictionary.PropertyDefinition
-			set prop = class.Properties.GetAt(i)
-			if prop.Internal || prop.Calculated || prop.ReadOnly || prop.Private || prop.Identity continue
-			set name = prop.Name
-			
-			// populate schema
-		}
-
+		do schema.data."__schema".types.%Push(..GetObjectFields(classname))
 	}
-	
 	quit schema
 }
 
-/// set s=##class(GraphQL.Utils.Schema).GetTemplate()
+ClassMethod GetObjectFields(className As %String) As %DynamicObject
+{
+	set class = ##class(%Dictionary.CompiledClass).%OpenId(className)
+	set object = ..GetObject(class)
+	return object
+}
+
+ClassMethod GetFields(class As %RegisteredObject) As %DynamicArray
+{
+	#dim fields As %DynamicArray = ##class(%DynamicArray).%New()
+	for i=1:1:class.Properties.Count() 
+	{
+		#dim property As %Dictionary.PropertyDefinition
+		set property = class.Properties.GetAt(i)
+		if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
+		
+		set field = ..GetField(property)
+		
+		do fields.%Push(field)
+	}
+	return fields
+}
+
+ClassMethod GetType(property As %Dictionary.PropertyDefinition) As %DynamicObject
+{
+	if (property.Required)
+	{
+		set type = ..GetRequiredOfType(property)	
+	}
+	elseif(property.Collection'=$$$NULL)
+	{
+		set type = ..GetListOfType(property)
+	}else{
+		set type = ..GetScalarOrObjectType(property)
+	}
+	return type
+}
+
+ClassMethod GetOfType(property As %Dictionary.PropertyDefinition) As %DynamicObject
+{
+	if (property.Collection '= $$$NULL)
+	{
+		set ofType = ..GetRequiredListOfType(property)
+	}else{
+		set ofType = ..GetScalarOrObjectType(property)
+	}
+	return ofType
+}
+
+ClassMethod GetScalarOrObjectType(property As %Dictionary.PropertyDefinition) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"kind":(..GetKind(property.Type)), 
+	"name":(..GetGQLTypeNameByCacheTypeName(property.Name)),
+	"ofType":null
+ }
+}
+
+ClassMethod GetRequiredListOfType(property As %Dictionary.CompiledProperty) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"kind":"LIST", 
+	"name":null,
+	"ofType":
+	{
+		"kind":"NON_NULL", 
+	 	"name":null,
+	 	"ofType":(..GetScalarOrObjectType(property))
+	}
+}
+}
+
+ClassMethod GetRequiredOfType(property As %Dictionary.CompiledProperty) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"kind":"NON_NULL", 
+	"name":null,
+	"ofType":(..GetOfType(property))
+}
+}
+
+ClassMethod GetListOfType(property As %Dictionary.CompiledProperty) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"kind":"LIST", 
+	"name":null,
+	"ofType":(..GetScalarOrObjectType(property))
+}
+}
+
+ClassMethod GetField(property As %Dictionary.PropertyDefinition) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"name": (property.Name),
+	"description": (property.Description),
+	"args": [], 							//need make class ..GetArgs()
+	"type": (..GetType(property)),
+	"isDeprecated": false,
+	"deprecationReason": null
+}
+}
+
+ClassMethod GetObject(class As %RegisteredObject) As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"kind": "OBJECT",
+	"name": ($Replace(class.Name, ".", "_")),
+	"description": (class.Description),
+	"fields": (..GetFields(class)),
+	"inputFields": null,
+	"interfaces": [],
+	"enumValues": null,
+	"possibleTypes": null
+}
+}
+
+ClassMethod GetKind(type As %String) As %String [ CodeMode = expression ]
+{
+$Select(($$$getClassType(type) = $$$cCLASSCLASSTYPESTREAM) || 
+			($$$getClassType(type) = $$$cCLASSCLASSTYPESTREAM):"SCALAR",
+		1:"OBJECT")
+}
+
+ClassMethod GetGQLTypeNameByCacheTypeName(CacheType As %String) As %String
+{
+ 	if ($Length(CacheType, "%") = 1){
+		return $Replace(CacheType, ".", "_")
+ 	}else{
+		return $Case($Piece(CacheType, ".", *),
+						"Numeric": "FLOAT",
+						"Float": "FLOAT",
+						"Double": "FLOAT",
+						"Int": "INT",
+						"String": "STRING",
+						"Char": "STRING",
+						"Date": "STRING",
+						"Boolean": "BOOLEAN",
+						"": $Piece(CacheType, ".", *))
+ 	}
+}
+
+/// // set s=##class(GraphQL.Utils.Schema).GetTemplate()
 ClassMethod GetTemplate() As %DynamicObject [ CodeMode = expression ]
 {
-{
-  "data": {
+{"data": {
     "__schema": {
       "queryType": {
         "name": "RootType"
