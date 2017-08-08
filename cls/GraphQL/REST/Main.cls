@@ -1,10 +1,13 @@
 Class GraphQL.REST.Main Extends %CSP.REST
 {
 
+Parameter CONTENTTYPE As %String = "application/json";
+
 XData UrlMap
 {
 <Routes>
    <Route Url="/graphql" Method="POST" Call="GraphQL"/>
+   <Route Url="/graphql" Method="GET" Call="GraphQL"/>
 </Routes>
 }
 

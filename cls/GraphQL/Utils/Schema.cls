@@ -7,16 +7,19 @@ Class GraphQL.Utils.Schema [ Abstract ]
 ClassMethod GetSchema() As %DynamicObject
 {
 	set schema = ..GetTemplate()
-
+	set root = ..GetRootTemplate()
+	
 	#dim rs As %SQL.ISelectResult
 	set rs = ##class(%Dictionary.ClassDefinitionQuery).SubclassOfFunc("%Library.Persistent")
 	while rs.%Next() {
 		set classname =  rs.Name
 		continue:$e(classname)="%"
 		continue:$$$defClassKeyGet(classname, $$$cCLASSsystem)'=0 // Skip system classes
-		
+		continue:'$$$comClassDefined(classname) // TODO fix for mapped classes
 		do schema.data."__schema".types.%Push(..GetObjectFields(classname))
+		do root.fields.%Push(..GetRootField(classname))
 	}
+	do schema.data."__schema".types.%Push(root)	
 	quit schema
 }
 
@@ -27,7 +30,7 @@ ClassMethod GetObjectFields(className As %String) As %DynamicObject
 	return object
 }
 
-ClassMethod GetFields(class As %RegisteredObject) As %DynamicArray
+ClassMethod GetFields(class As %Dictionary.CompiledClass) As %DynamicArray
 {
 	#dim fields As %DynamicArray = ##class(%DynamicArray).%New()
 	for i=1:1:class.Properties.Count() 
@@ -43,7 +46,7 @@ ClassMethod GetFields(class As %RegisteredObject) As %DynamicArray
 	return fields
 }
 
-ClassMethod GetType(property As %Dictionary.PropertyDefinition) As %DynamicObject
+ClassMethod GetType(property As %Dictionary.CompiledProperty) As %DynamicObject
 {
 	if (property.Required)
 	{
@@ -58,7 +61,7 @@ ClassMethod GetType(property As %Dictionary.PropertyDefinition) As %DynamicObjec
 	return type
 }
 
-ClassMethod GetOfType(property As %Dictionary.PropertyDefinition) As %DynamicObject
+ClassMethod GetOfType(property As %Dictionary.CompiledProperty) As %DynamicObject
 {
 	if (property.Collection '= $$$NULL)
 	{
@@ -122,7 +125,7 @@ ClassMethod GetField(property As %Dictionary.PropertyDefinition) As %DynamicObje
 }
 }
 
-ClassMethod GetObject(class As %RegisteredObject) As %DynamicObject [ CodeMode = expression ]
+ClassMethod GetObject(class As %Dictionary.CompiledClass) As %DynamicObject [ CodeMode = expression ]
 {
 {
 	"kind": "OBJECT",
@@ -157,8 +160,43 @@ ClassMethod GetGQLTypeNameByCacheTypeName(CacheType As %String) As %String
 						"Char": "STRING",
 						"Date": "STRING",
 						"Boolean": "BOOLEAN",
-						"": $Piece(CacheType, ".", *))
+						: $Piece(CacheType, ".", *))
  	}
+}
+
+ClassMethod GetRootField(classname As %String) As %DynamicObject [ CodeMode = expression ]
+{
+{
+  "name": ($Replace(classname, ".", "_") _ "Query"),
+  "description": null,
+  "args": [],
+  "type": {
+    "kind": "LIST",
+    "name": null,
+    "ofType": {
+      "kind": "OBJECT",
+      "name": ($Replace(classname, ".", "_")),
+      "ofType": null
+    }
+  },
+  "isDeprecated": false,
+  "deprecationReason": null
+}
+}
+
+ClassMethod GetRootTemplate() As %DynamicObject [ CodeMode = expression ]
+{
+{
+  "kind": "OBJECT",
+  "name": "RootType",
+  "description": null,
+  "fields": [
+  ],
+  "inputFields": null,
+  "interfaces": [],
+  "enumValues": null,
+  "possibleTypes": null
+}
 }
 
 /// // set s=##class(GraphQL.Utils.Schema).GetTemplate()
@@ -172,84 +210,6 @@ ClassMethod GetTemplate() As %DynamicObject [ CodeMode = expression ]
       "mutationType": null,
       "subscriptionType": null,
       "types": [
-        {
-          "kind": "OBJECT",
-          "name": "RootType",
-          "description": null,
-          "fields": [
-            {
-              "name": "Persons",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "PersonType",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "PersonType",
-          "description": "PersonType description",
-          "fields": [
-            {
-              "name": "id",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "name",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "address",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "AddressType",
-                  "ofType": null
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
-          "enumValues": null,
-          "possibleTypes": null
-        },
         {
           "kind": "SCALAR",
           "name": "ID",
@@ -267,41 +227,6 @@ ClassMethod GetTemplate() As %DynamicObject [ CodeMode = expression ]
           "fields": null,
           "inputFields": null,
           "interfaces": null,
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "AddressType",
-          "description": "AddressType description",
-          "fields": [
-            {
-              "name": "id",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "ID",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            },
-            {
-              "name": "city",
-              "description": null,
-              "args": [],
-              "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [],
           "enumValues": null,
           "possibleTypes": null
         },
