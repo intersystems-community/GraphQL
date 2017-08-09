@@ -13,14 +13,16 @@ XData UrlMap
 
 ClassMethod GraphQL()
 {
-	// Set Stream = ##class(%Stream.FileCharacter).%New()
-	// do Stream.LinkToFile("C:\Users\gevor\Desktop\graphiql-0.11.2\example\graphql")
-	// do Stream.OutputToDevice()
-	set s=##class(GraphQL.Utils.Schema).GetSchema()
-	w s.%ToJSON()
 	
-	q 1
+	set Schema=##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
+	
+	set Stream = ##class(%Stream.FileCharacter).%New()
+	do Stream.LinkToFile("C:\temp\GQL\schema.json")
+	do Stream.Write(Schema)
+	do Stream.%Save()
+	
+	w Schema
+	return $$$OK
 }
 
 }
-
