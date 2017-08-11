@@ -64,3 +64,5 @@ ROUTINE Tokens [Type=INC]
 
 ///Other
 #define NULL ""
+#define Args 1
+#define Fields 0
