@@ -10,6 +10,7 @@ ClassMethod GetSchema() As %DynamicObject
 	#dim root As %DynamicObject = ..GetRootTemplate()
 	#dim gqlTypes As %DynamicArray = ..GetGQLTypeTemplate()
 	#dim typeList As %List = ""
+	#dim completeList As %List = ""
 	
 	do schema.data."__schema".types.%Push(root)
 	
@@ -24,36 +25,50 @@ ClassMethod GetSchema() As %DynamicObject
 		continue:'$$$comClassDefined(classname) // TODO fix for mapped classes
 		
 		set typeList = typeList _ $lb(classname)
+		
 		do schema.data."__schema".types.%Get(0).fields.%Push(..GetRootField(classname))
 	}
 	
-	#dim completeList As %List = ""
-	while $ll(typeList)>0 {
+	while $ll(typeList)>0 
+	{
 		set classname = $listget(typeList)
 		set $list(typeList, 1, 1) = ""
 		set completeList = completeList _ $lb(classname) 
-		do schema.data."__schema".types.%Push(..GetClassFields(classname, .relatedTypes))
 		
-		for i=1:1:$listlength(relatedTypes) {
-			set newType = $lg(relatedTypes, i)
-			if (($listfind(typeList, newType)=0) && ($listfind(completeList, newType)=0)) {
-				set typeList = typeList _ $lb(newType)
-			}
+		if '..SkipIfNameExistInSchema(classname)
+		{
+			do schema.data."__schema".types.%Push(..GetClassFields(classname))
 		}
+		
+		do ..GetTypeList(completeList, classname, .typeList)		
 	}
 	
 	set iter = gqlTypes.%GetIterator()
 	while iter.%GetNext(,.value ) 
 	{
-	      do schema.data."__schema".types.%Push(value)
+	    do schema.data."__schema".types.%Push(value)
 	}	
 	quit schema
 }
 
+ClassMethod GetTypeList(completeList As %List, classname As %String, Output typeList)
+{
+	set relatedTypes = ..GetClassRelatedTypes(classname)
+	
+	for i=1:1:$listlength(relatedTypes) 
+	{
+		set newType = $lg(relatedTypes, i)
+		if (($listfind(typeList, newType)=0) && ($listfind(completeList, newType)=0)) {
+			set typeList = typeList _ $lb(newType)
+		}
+	}
+	
+	return $$$OK
+}
+
 ClassMethod GetClassFields(classname As %Dictionary.CacheClassname, Output relatedTypes) As %DynamicObject
 {
-	kill relatedTypes
-	set relatedTypes = ..GetClassRelatedTypes(classname)
+	
 	set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 	
 	if (..GetKind(classname) = "SCALAR")
@@ -64,15 +79,6 @@ ClassMethod GetClassFields(classname As %Dictionary.CacheClassname, Output relat
 		set object = ..GetObject(class)
 		return object
 	}
-}
-
-/// zw ##class(GraphQL.Utils.Schema).GetClassRelatedTypes("Sample.Employee")
-ClassMethod GetClassRelatedTypes(classname As %Dictionary.CacheClassname) As %List
-{
-	&sql(SELECT 
-		%DLIST(Distinct Type) INTO :relatedTypes
-		FROM %Dictionary.CompiledProperty where parent = :classname)
-	quit relatedTypes
 }
 
 ClassMethod GetFields(class As %Dictionary.CompiledClass) As %DynamicArray
@@ -199,6 +205,15 @@ ClassMethod GetScalar(class As %Dictionary.CompiledClass) As %DynamicObject [ Co
 }
 }
 
+/// zw ##class(GraphQL.Utils.Schema).GetClassRelatedTypes("Sample.Employee")
+ClassMethod GetClassRelatedTypes(classname As %Dictionary.CacheClassname) As %List
+{
+	&sql(SELECT 
+		%DLIST(Distinct Type) INTO :relatedTypes
+		FROM %Dictionary.CompiledProperty where parent = :classname)
+	quit relatedTypes
+}
+
 /// w ##class(GraphQL.Utils.Schema).GetKind("%Library.CacheString")
 ClassMethod GetKind(type As %String) As %String [ CodeMode = expression ]
 {
@@ -212,6 +227,12 @@ ClassMethod GetDescription(description As %String) As %String [ CodeMode = expre
 $Replace(##class(%iKnow.Source.Converter.Html).StripHTML(description),$c(13,10),"")
 }
 
+ClassMethod SkipIfNameExistInSchema(classname) As %Boolean
+{
+	set checkName = ..GetGQLTypeNameByCacheTypeName(classname)
+	return $select((checkName = "String") || (checkName = "Float") || (checkName = "Int") || (checkName = "Boolean"): 1, 1:0)
+}
+
 ClassMethod GetGQLTypeNameByCacheTypeName(classname As %String) As %String
 {
 	if ($Length(classname, "%") = 2){
@@ -223,7 +244,8 @@ ClassMethod GetGQLTypeNameByCacheTypeName(classname As %String) As %String
 						"CacheString": "String",
 						"Char": "String",
 						"Date": "String",
-						"Boolean": "Boolean",
+						"TimeStamp": "String",
+						"Binary": "String",
 						"GlobalCharacter":"String",
 						"GlobalBinary":"String",
 						: $Piece(classname, ".", *))
