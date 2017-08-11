@@ -1,6 +1,8 @@
 Class GraphQL.REST.Main Extends %CSP.REST
 {
 
+Parameter HandleCorsRequest = 1;
+
 Parameter CONTENTTYPE As %String = "application/json";
 
 XData UrlMap
