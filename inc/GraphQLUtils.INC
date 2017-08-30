@@ -1,4 +1,4 @@
-ROUTINE Tokens [Type=INC]
+ROUTINE GraphQLUtils [Type=INC]
 ///enum TOKEN KIND
 #define EOF  1
 #define BANG  2
