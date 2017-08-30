@@ -1,4 +1,4 @@
-Include Tokens
+Include GraphQLUtils
 
 Class GraphQL.ParserContext Extends %RegisteredObject
 {
@@ -84,7 +84,7 @@ Method CreateOperationDefinition(Start As %Integer, Operation As %Integer = {$$$
 {
 	set Definition = ##class(GraphQL.AST.GraphQLOperationDefinition).%New()
 	
-	if ($Data(Operation) && $Data(Name))
+	if ((Operation '= "") && (Name '= ""))
 	{
 		set Definition.Operation = Operation
 		set Definition.Name = Name
@@ -144,7 +144,7 @@ Method ParseFragment() As GraphQL.AST.ASTNode
 {
 	set Start = ..CurrentToken.Start
 	do ..Expect($$$SPREAD)
-	if (..Peek($$$NAME) && ..CurrentToken.Value '= "on")
+	if (..Peek($$$NAME) && (..CurrentToken.Value '= "on"))
 	{
 		return ..CreateGraphQLFragmentSpread(Start) //done
 	}
@@ -171,7 +171,7 @@ Method CreateInlineFragment(Start As %Integer) As GraphQL.AST.ASTNode
 
 Method GetTypeCondition() As GraphQL.AST.GraphQLNamedType
 {
-	if (..CurrentToken.Value '= $$$NULL && ..CurrentToken.Value = "on")
+	if ((..CurrentToken.Value '= $$$NULL) && (..CurrentToken.Value = "on"))
 	{
 		do ..Advance()
 		return ..ParseNamedType()
@@ -193,11 +193,11 @@ Method ParseDirective() As GraphQL.AST.GraphQLDirective
 {
 	set Start = ..CurrentToken.Start
 	do ..Expect($$$AT)
-	
+	if Start = "" break
 	set Directive = ##class(GraphQL.AST.GraphQLDirective).%New()
 	set Directive.Name = ..ParseName()
 	set Directive.Arguments = ..ParseArguments()
-	set Directive.Location = ..GetLocation()
+	set Directive.Location = ..GetLocation(Start)
 	
 	return Directive
 }
@@ -276,7 +276,7 @@ Method ParseNameValue(IsConstant As %Boolean) As GraphQL.AST.GraphQLValue
 	if (..CurrentToken.Value = "true" || ..CurrentToken.Value = "false")
 	{
 		 return ..ParseBooleanValue(..CurrentToken)							//done
-	}elseif(..CurrentToken.Value'="" && ..CurrentToken.Value '= "null"){
+	}elseif((..CurrentToken.Value'="") && (..CurrentToken.Value '= "null")){
 		return ..ParseEnumValue(..CurrentToken)								//done
 	}
 	
@@ -417,7 +417,7 @@ Method Expect(Kind)
 	}else{
 		set ExpectedKind = ##class(Token).GetTokenKindDescription(Kind)
 		set ReceivedKind = ##class(Token).GetTokenKindDescription(..CurrentToken.Kind)
-		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Expected:'"_ExpectedKind_"' Received:'"_ReceivedKind_"' Location:",..Source, ..GetLocation(..CurrentToken.Start))
+		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Expected:'"_ExpectedKind_"' Received:'"_ReceivedKind_"' Location:",..Source, ..CurrentToken.Start)
 	}
 }
 
@@ -734,7 +734,7 @@ Method ExpectOnKeywordAndParseNamedType() As GraphQL.AST.GraphQLNamedType
 
 Method ExpectKeyword(Keyword As %String) As %Status
 {
-	if (..CurrentToken.Kind = $$$NAME && ..CurrentToken.Value = Keyword)
+	if ((..CurrentToken.Kind = $$$NAME) && (..CurrentToken.Value = Keyword))
 	{
 		do ..Advance()
 		quit

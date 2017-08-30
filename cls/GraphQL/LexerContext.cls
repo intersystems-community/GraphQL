@@ -1,4 +1,4 @@
-Include Tokens
+Include GraphQLUtils
 
 Class GraphQL.LexerContext Extends %RegisteredObject
 {
@@ -20,12 +20,12 @@ Method GetToken() As Token
 	
 	set ..CurrentIndex = ..GetPositionAfterWhitespace(..Source.Body, ..CurrentIndex)
 	
-	if (..CurrentIndex > $Length(..Source.Body)) return ..CreateEOFToken()
+	if (..CurrentIndex >= $Length(..Source.Body)) return ..CreateEOFToken()
 	
 	set Unicode = ..IfUnicodeGetString()
 	
-	set Char = $Extract(..Source.Body,..CurrentIndex)
-		
+	set Char = $Extract(..Source.Body, ..CurrentIndex)
+
 	do ..ValidateCharacterCode(Char)
 	
 	set Token = ..CheckForPunctuationTokens(Char)
@@ -37,6 +37,8 @@ Method GetToken() As Token
 	return:Char?1(1N,1"-") ..ReadNumber() 
 	
 	return:Char="""" ..ReadString()
+	
+	throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unexpected character: "_Char,..Source,..CurrentIndex)
 }
 
 Method ReadName() As Token
@@ -67,7 +69,7 @@ Method ReadNumber() As Token
 		throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Invalid number, unexpected digit after "_Char_": "_NextChar,..Source,..CurrentIndex)
 	}
 	
-	set Char = ..NextChar()
+	set Char = NextChar
 	
 	if (Char = ".")
 	{
@@ -261,7 +263,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 	{
 		set Char = $Extract(Body, Position)
 		
-		if ((Char = $c(9)) || (Char = " ") ||(Char = $c(10)) || (Char = $c(13)) || (Char = ",")  || (($Extract(Body, Position) = $c(239)) && ($Extract(Body, Position + 1) = $c(187)) && ($Extract(Body, Position + 2) = $c(191)))) 
+		if (((Char = $c(9)) || (Char = " ") || (Char = $c(10)) || (Char = $c(13)) || (Char = ",")  || ((($Extract(Body, Position) = $c(239))) && ($Extract(Body, Position + 1) = $c(187)) && ($Extract(Body, Position + 2) = $c(191))))) 
 		{
 			set Position = Position + 1
 		}elseif (Char = "#"){
@@ -275,7 +277,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 
 Method WaitForEndOfComment(Body As %String, Position As %Integer, Char As %Char) As %Integer
 {
-	while((Position < $Length(Body)) && Char '="" && ($Ascii(Char) > 31 || Char = $c(9)) && Char '=$c(10) && Char '=$c(13))
+	while((Position < $Length(Body)) && (Char '="") && (($Ascii(Char) > 31) || (Char = $c(9))) && (Char '=$c(10)) && (Char '=$c(13)))
 	{
 		set Position = Position + 1
 		set Char = $Extract(Body, Position)
@@ -333,9 +335,9 @@ Method CreateNameToken(Start As %Integer) As Token
 
 Method CheckForSpreadOperator() As Token
 {
-	set Char1 = $Select($Length(..Source.Body) > ..CurrentIndex + 1: $Extract(..Source.Body,..CurrentIndex + 1),1: 0)
-	set Char2 = $Select($Length(..Source.Body) > ..CurrentIndex + 2: $Extract(..Source.Body,..CurrentIndex + 2),1: 0)
-	if (Char1 = "." && Char2 = ".")
+	set Char1 = $Select($Length(..Source.Body) > (..CurrentIndex + 1): $Extract(..Source.Body, ..CurrentIndex + 1),1: 0)
+	set Char2 = $Select($Length(..Source.Body) > (..CurrentIndex + 2): $Extract(..Source.Body, ..CurrentIndex + 2),1: 0)
+	if ((Char1 = ".") && (Char2 = "."))
 	{
 		return ..CreatePunctuationToken($$$SPREAD, 3)
 	}

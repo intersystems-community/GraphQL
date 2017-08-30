@@ -1,4 +1,4 @@
-Include Tokens
+Include GraphQLUtils
 
 Class GraphQL.Utils.Hash
 {

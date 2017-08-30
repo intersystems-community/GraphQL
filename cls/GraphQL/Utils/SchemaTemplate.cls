@@ -15,7 +15,7 @@ ClassMethod GetTemplate() As %DynamicObject [ CodeMode = expression ]
             "types": [{
 					  "kind": "OBJECT",
 					  "name": "Query",
-					  "description": null,
+					  "description": "The query root of InterSystems GraphQL interface.",
 					  "fields": [
 					  ],
 					  "inputFields": null,
@@ -932,6 +932,80 @@ ClassMethod GetGQLTypeTemplate() As %DynamicArray [ CodeMode = expression ]
     ],
     "possibleTypes": null
 }]
+}
+
+ClassMethod GetFiltersForArgs() As %DynamicArray [ CodeMode = expression ]
+{
+[{
+        "name": "first",
+        "description": "Returns the first _n_ elements from the list.",
+        "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+        },
+        "defaultValue": null
+    },
+    {
+        "name": "after",
+        "description": "Returns the elements in the list that come after the specified global ID.",
+        "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+        },
+        "defaultValue": null
+    },
+    {
+        "name": "last",
+        "description": "Returns the last _n_ elements from the list.",
+        "type": {
+            "kind": "SCALAR",
+            "name": "Int",
+            "ofType": null
+        },
+        "defaultValue": null
+    },
+    {
+        "name": "before",
+        "description": "Returns the elements in the list that come before the specified global ID.",
+        "type": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": null
+        },
+        "defaultValue": null
+}]
+}
+
+ClassMethod GetIDforFields() As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"name": "id",
+	"description": "ID of the object",
+	"args": [], 						
+	"type": {
+		"kind": "SCALAR", 
+		"name": "ID",
+		"ofType":null
+ 	},
+	"isDeprecated": false,
+	"deprecationReason": null
+}
+}
+
+ClassMethod GetIDforArgs() As %DynamicObject [ CodeMode = expression ]
+{
+{
+	"name": "id",
+	"description": "ID of the object", 						
+	"type": {
+		"kind": "SCALAR", 
+		"name": "ID",
+		"ofType":null
+ 	},
+	"defaultValue": null
+}
 }
 
 }

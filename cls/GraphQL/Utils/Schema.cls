@@ -49,7 +49,7 @@ ClassMethod GetClassFields(classname As %Dictionary.CacheClassname) As %DynamicO
 {
 	set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 	
-	if (..GetKind(classname) = "SCALAR")
+	if (..GetKind(classname) = $$$SCALAR)
 	{
 		set scalar = ..GetScalar(class)
 		return scalar
@@ -78,10 +78,13 @@ ClassMethod GetArgsOrFields(class As %Dictionary.CompiledClass, flag As %Boolean
 		
 		if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
 		
-		if (flag = $$$Args){
+		if ((flag = $$$Args) && (..GetKind(property.Type) = $$$SCALAR))
+		{
 			set arg = ..GetArg(property)
 			do argsOrFields.%Push(arg)
-		}else{
+		}
+		elseif((flag = $$$Fields))
+		{
 			set field = ..GetField(property)
 			do argsOrFields.%Push(field)
 		}
@@ -161,7 +164,7 @@ ClassMethod GetField(property As %Dictionary.PropertyDefinition) As %DynamicObje
 {
 	"name": ($Replace(property.Name,"%","")),
 	"description":(..GetDescription(property.Description)),
-	"args": [],
+	"args": ($Select(..GetKind(property.Type) = $$$OBJECT:..GetFiltersForArgs(),1: [])),
 	"type": (..GetType(property)),
 	"isDeprecated": false,
 	"deprecationReason": null
@@ -178,40 +181,10 @@ ClassMethod GetArg(property As %Dictionary.PropertyDefinition) As %DynamicObject
 }
 }
 
-ClassMethod GetIDforFields() As %DynamicObject [ CodeMode = expression ]
-{
-{
-	"name": "id",
-	"description": "ID of the object",
-	"args": [], 						
-	"type": {
-		"kind": "SCALAR", 
-		"name": "ID",
-		"ofType":null
- 	},
-	"isDeprecated": false,
-	"deprecationReason": null
-}
-}
-
-ClassMethod GetIDforArgs() As %DynamicObject [ CodeMode = expression ]
-{
-{
-	"name": "id",
-	"description": "ID of the object", 						
-	"type": {
-		"kind": "SCALAR", 
-		"name": "ID",
-		"ofType":null
- 	},
-	"defaultValue": null
-}
-}
-
 ClassMethod GetObject(class As %Dictionary.CompiledClass) As %DynamicObject [ CodeMode = expression ]
 {
 {
-	"kind": "OBJECT",
+	"kind": ($$$OBJECT),
 	"name": (..GetGQLTypeNameByCacheTypeName(class.Name)),
 	"description": (..GetDescription(class.Description)),
 	"fields": (..GetArgsOrFields(class, $$$Fields)),
@@ -225,7 +198,7 @@ ClassMethod GetObject(class As %Dictionary.CompiledClass) As %DynamicObject [ Co
 ClassMethod GetScalar(class As %Dictionary.CompiledClass) As %DynamicObject [ CodeMode = expression ]
 {
 {
-	"kind": "SCALAR",
+	"kind": ($$$SCALAR),
 	"name": (..GetGQLTypeNameByCacheTypeName(class.Name)),
 	"description": (..GetDescription(class.Description)),
 	"fields": [],
@@ -246,7 +219,7 @@ ClassMethod GetRootField(classname As %String) As %DynamicObject [ CodeMode = ex
     "kind": "LIST",
     "name": null,
     "ofType": {
-      "kind": "OBJECT",
+      "kind": ($$$OBJECT),
       "name": ($Replace(classname, ".", "_")),
       "ofType": null
     }
@@ -269,8 +242,8 @@ ClassMethod GetClassRelatedTypes(classname As %Dictionary.CacheClassname) As %Li
 ClassMethod GetKind(type As %String) As %String [ CodeMode = expression ]
 {
 $Select(($$$getClassType(type) = $$$cCLASSCLASSTYPESTREAM) || 
-			($$$getClassType(type) = $$$cCLASSCLASSTYPEDATATYPE):"SCALAR",
-		1:"OBJECT")
+			($$$getClassType(type) = $$$cCLASSCLASSTYPEDATATYPE):$$$SCALAR,
+		1:$$$OBJECT)
 }
 
 ClassMethod GetDescription(description As %String) As %String [ CodeMode = expression ]
@@ -314,6 +287,10 @@ ClassMethod GetTypeList(completeList As %List, classname As %String, Output type
 	}
 	
 	return $$$OK
+}
+
+ClassMethod PushTypesInSchema(Output schema, types As %DynamicArray) As %Status
+{
 }
 
 ClassMethod AddTypesInSchemaTypes(Output schema, types As %DynamicArray) As %Status

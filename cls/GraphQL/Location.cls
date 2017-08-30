@@ -15,7 +15,7 @@ Method %OnNew(Source As GraphQL.Source, Position As %Integer) As %Status
 	while LineRegex.Locate()
 	{
 		set:'$Data(FirstLengh) FirstLengh = LineRegex.End
-		if (LineRegex.Start >= Position) break
+		if (LineRegex.Start >= Position) quit
 		
 		set ..Line = ..Line + 1
 		set ..Column = Position + 1 - (LineRegex.Start + FirstLengh)

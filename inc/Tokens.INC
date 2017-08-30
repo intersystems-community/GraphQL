@@ -58,11 +58,13 @@ ROUTINE Tokens [Type=INC]
 #define DirectiveDefinition 35
 
 ///enum OPERATIONS TYPE
-#define QUERY 0
-#define MUTATION 1
-#define SUBSCRIPTON 2
+#define QUERY "Query"
+#define MUTATION "Mutation"
+#define SUBSCRIPTON "Subscription"
 
 ///Other
 #define NULL ""
 #define Args 1
 #define Fields 0
+#define SCALAR "SCALAR"
+#define OBJECT "OBJECT"

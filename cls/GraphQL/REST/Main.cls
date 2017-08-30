@@ -1,4 +1,6 @@
-Class GraphQL.REST.Main Extends %CSP.REST
+Include GraphQLUtils
+
+Class GraphQL.REST.Main Extends AbstractREST
 {
 
 Parameter HandleCorsRequest = 1;
@@ -9,22 +11,39 @@ XData UrlMap
 {
 <Routes>
    <Route Url="/graphql" Method="POST" Call="GraphQL"/>
-   <Route Url="/graphql" Method="GET" Call="GraphQL"/>
+   <Route Url="/graphql" Method="GET" Call="GraphiQL"/>
 </Routes>
 }
 
 ClassMethod GraphQL()
 {
+	#dim %request as %CSP.Request
+	set query = %request.Content.query
+	set GiQLHASH = $system.Encryption.MD5Hash(query)
 	
-	set Schema=##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
-	
-	set Stream = ##class(%Stream.FileCharacter).%New()
-	do Stream.LinkToFile("C:\temp\GQL\schema.json")
-	do Stream.Write(Schema)
-	do Stream.%Save()
-	
-	w Schema
+	if GiQLHASH = "ú60t·}RÌë"
+	{	
+		set Schema=##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
+		
+		set Stream = ##class(%Stream.FileCharacter).%New()
+		do Stream.LinkToFile("C:\temp\GQL\schema.json")
+		do Stream.Write(Schema)
+		do Stream.%Save()
+		
+		w Schema
+	}else{
+		set ast = ##class(GraphQL.Utils.Test).GetAst(query_" ")
+		do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
+	}
+
 	return $$$OK
 }
 
+ClassMethod GraphiQL()
+{
+	
+	return 1
 }
+
+}
+
