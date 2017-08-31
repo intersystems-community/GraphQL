@@ -1,0 +1,5 @@
+Class GraphQL.Abstract [ Abstract ]
+{
+
+}
+

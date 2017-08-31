@@ -321,7 +321,7 @@ Method CreateIntToken(Start As %Integer) As Token
 {
 	set End = ..CurrentIndex
 	set Kind = $$$INT
-	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 2) //Нужно понять почему -2 а не -1...
+	set Value = $Extract(..Source.Body, Start,..CurrentIndex - 1)
 	return ##class(Token).%New(Start, End, Kind, Value)
 }
 

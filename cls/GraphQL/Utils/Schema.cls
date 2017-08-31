@@ -1,4 +1,4 @@
-Include Tokens
+Include GraphQLUtils
 
 Class GraphQL.Utils.Schema Extends GraphQL.Utils.SchemaTemplate [ Abstract ]
 {
@@ -12,7 +12,7 @@ ClassMethod GetSchema() As %DynamicObject
 	#dim completeList As %List = ""
 	#dim rs As %SQL.ISelectResult
 	
-	set rs = ##class(%Dictionary.ClassDefinitionQuery).SubclassOfFunc("%Library.Persistent")
+	set rs = ##class(%Dictionary.ClassDefinitionQuery).SubclassOfFunc("GraphQL.Abstract")
 	while rs.%Next() 
 	{
 		set classname =  rs.Name
