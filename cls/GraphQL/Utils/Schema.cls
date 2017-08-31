@@ -12,17 +12,10 @@ ClassMethod GetSchema() As %DynamicObject
 	#dim completeList As %List = ""
 	#dim rs As %SQL.ISelectResult
 	
-	set rs = ##class(%Dictionary.ClassDefinitionQuery).SubclassOfFunc("GraphQL.Abstract")
-	while rs.%Next() 
+	set typeList = $classmethod(##class(GraphQL.Settings).GetSetting("SCOPECLASS"), "GetClasses")
+	for i=1:1:$ll(typeList) 
 	{
-		set classname =  rs.Name
-		
-		continue:$e(classname)="%"
-		continue:$$$defClassKeyGet(classname, $$$cCLASSsystem)'=0 // Skip system classes
-		continue:'$$$comClassDefined(classname) // TODO fix for mapped classes
-		
-		set typeList = typeList _ $lb(classname)
-		
+		set classname =  $lg(typeList, i)		
 		do schema.data."__schema".types.%Get(0).fields.%Push(..GetRootField(classname))
 	}
 	

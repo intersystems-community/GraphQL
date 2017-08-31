@@ -5,7 +5,7 @@ Class GraphQL.Settings [ Abstract ]
 Parameter SETTINGSGLVN = "^GraphQL.Settings";
 
 /// scopeclass - class for SQL queries. See Form.REST.Objects for implementation details
-Parameter SCOPECLASS = 1;
+Parameter SCOPECLASS = "GraphQL.Scope.All";
 
 /// Get setting value by name (name is always uppercase)
 /// Refer to parameters for possible settings
