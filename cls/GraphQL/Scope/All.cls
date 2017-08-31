@@ -9,7 +9,7 @@ ClassMethod GetClasses() As %List
 	while rs.%Next() 
 	{
 		set classname = rs.Name
-		//continue:$e(classname)="%"
+		continue:$e(classname)="%"
 		continue:$$$defClassKeyGet(classname, $$$cCLASSsystem)'=0 // Skip system classes
 		continue:'$$$comClassDefined(classname) // TODO fix for mapped classes
 		set list = list _ $lb(classname)
