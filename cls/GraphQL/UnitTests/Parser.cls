@@ -5,7 +5,7 @@
 Class GraphQL.UnitTests.Parser Extends %UnitTest.TestCase
 {
 
-ClassMethod GetAst(query As %String, Output ast As GraphQL.AST.GraphQLDocument) As %Status
+ClassMethod GetAst(query As %String = {##class(%Dictionary.XDataDefinition).IDKEYOpen($classname(),"IQ").Data.Read()}, Output ast As GraphQL.AST.GraphQLDocument) As %Status
 {
 	#dim sc As %Status = $$$OK
 	set parser = ##class(GraphQL.Parser).%New()
@@ -15,6 +15,18 @@ ClassMethod GetAst(query As %String, Output ast As GraphQL.AST.GraphQLDocument) 
 		set sc = ex.AsStatus()
 	}
 	quit sc
+}
+
+XData IQ
+{
+query{
+  Sample_Person{
+    id
+    Name
+	FavoriteColors
+    DOB
+  }
+}
 }
 
 Method TestDataTypeFields()
