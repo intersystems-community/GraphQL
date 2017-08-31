@@ -1,3 +1,7 @@
+/// Unit tests
+/// set ^UnitTestRoot = "C:\temp\CacheQL\cls\GraphQL\UnitTests\"
+/// do ##class(sc.code).export()
+/// do ##class(%UnitTest.Manager).RunTest("","/loadudl/nodelete")
 Class GraphQL.UnitTests.Parser Extends %UnitTest.TestCase
 {
 
@@ -17,33 +21,29 @@ Method TestDataTypeFields()
 {
 	set query = "{ hero{ name }}"
 	set sc = ..GetAst(query)
-	//do $$$AssertStatusNotOK(sc,"Fields is not supported")
-	do $$$AssertStatusOK(sc,"Fields is supported")
+	do $$$AssertStatusOK(sc,"Fields are supported")
 }
 
 Method TestObjectFields()
 {
 	set query = "{ hero{ name friends{ name }}}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Object fields is not supported")
-	do $$$AssertStatusOK(sc,"Object fields is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Object fields are supported")
 }
 
 Method TestArguments()
 {
 	set query = "{ human(id: ""1000""){ name }}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Arguments is not supported")
-	do $$$AssertStatusOK(sc,"Arguments is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Arguments are supported")
 }
 
 Method TestAliases()
 {
 	set query = "{empireHero: hero(episode: EMPIRE) {name}"_
 				 "jediHero: hero(episode: JEDI) {name}}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Aliases is not supported")
-	do $$$AssertStatusOK(sc,"Aliases is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Aliases are supported")
 }
 
 Method TestFragments()
@@ -59,9 +59,8 @@ Method TestFragments()
 						"friends{"_
 				    		"name}"_
 				   "}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query_$c(10)_fragment))
-	do $$$AssertStatusNotOK(sc,"Fragments is not supported")
-	do $$$AssertStatusOK(sc,"Fragments is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Fragments are supported")
 }
 
 Method TestVariables()
@@ -74,9 +73,8 @@ Method TestVariables()
     					"}"_
   					"}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Variables is not supported")
-	do $$$AssertStatusOK(sc,"Variables is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Variables are supported")
 }
 
 Method TestDefaultVariables()
@@ -89,9 +87,8 @@ Method TestDefaultVariables()
     					"}"_
   					"}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Default variables is not supported")
-	do $$$AssertStatusOK(sc,"Default variables is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Default variables are supported")
 }
 
 Method TestDirectives()
@@ -104,9 +101,8 @@ Method TestDirectives()
     					"}"_
   					"}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Directives is not supported")
-	do $$$AssertStatusOK(sc,"Directives is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Directives are supported")
 }
 
 Method TestInlineFragment()
@@ -122,9 +118,8 @@ Method TestInlineFragment()
 				    "}"_
 				  "}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Inline fragment is not supported")
-	do $$$AssertStatusOK(sc,"Inline fragment is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Inline fragment are supported")
 }
 
 Method TestMetaFields()
@@ -142,9 +137,8 @@ Method TestMetaFields()
 				    "}"_
 				  "}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Meta fields is not supported")
-	do $$$AssertStatusOK(sc,"Metaf ields is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Meta fields are supported")
 }
 
 Method TestMutation()
@@ -155,9 +149,8 @@ Method TestMutation()
     					"commentary"_
   					"}"_
 				"}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Mutation is not supported")
-	do $$$AssertStatusOK(sc,"Mutation is supported")
+	set sc = ..GetAst(query)
+	do $$$AssertStatusOK(sc,"Mutation are supported")
 }
 
 }
