@@ -32,7 +32,7 @@ ClassMethod GraphQL()
 		
 		w Schema
 	}else{
-		set ast = ##class(GraphQL.Utils.Test).GetAst(query_" ")
+		set ast = ##class(GraphQL.Utils.Test).GetAst(query)
 		do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
 	}
 

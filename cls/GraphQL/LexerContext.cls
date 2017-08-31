@@ -20,7 +20,7 @@ Method GetToken() As Token
 	
 	set ..CurrentIndex = ..GetPositionAfterWhitespace(..Source.Body, ..CurrentIndex)
 	
-	if (..CurrentIndex >= $Length(..Source.Body)) return ..CreateEOFToken()
+	if (..CurrentIndex > $Length(..Source.Body)) return ..CreateEOFToken()
 	
 	set Unicode = ..IfUnicodeGetString()
 	
@@ -259,7 +259,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 {
 	set Position = Start
 
-	while( Position < $Length(Body))
+	while( Position <= $Length(Body))
 	{
 		set Char = $Extract(Body, Position)
 		
