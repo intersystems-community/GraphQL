@@ -3,7 +3,7 @@ Class GraphQL.Parser Extends %RegisteredObject
 
 Property Lexer As Lexer;
 
-Method %OnNew(Lexer As Lexer) As %Status
+Method %OnNew(Lexer As Lexer = {##class(Lexer).%New()}) As %Status
 {
 	set ..Lexer = Lexer
 	return $$$OK
