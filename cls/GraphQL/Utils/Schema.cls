@@ -10,7 +10,6 @@ ClassMethod GetSchema() As %DynamicObject
 	#dim gqlTypes As %DynamicArray = ..GetGQLTypeTemplate()
 	#dim typeList As %List = ""
 	#dim completeList As %List = ""
-	#dim rs As %SQL.ISelectResult
 	
 	set typeList = $classmethod(##class(GraphQL.Settings).GetSetting("SCOPECLASS"), "GetClasses")
 	for i=1:1:$ll(typeList) 
