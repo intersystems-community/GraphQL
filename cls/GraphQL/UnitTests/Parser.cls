@@ -1,20 +1,27 @@
-Class GraphQL.Utils.UnitTests Extends %UnitTest.TestScript
+Class GraphQL.UnitTests.Parser Extends %UnitTest.TestCase
 {
 
-ClassMethod runScript(scriptfile As %String, outputfile As %String)
+ClassMethod GetAst(query As %String, Output ast As GraphQL.AST.GraphQLDocument) As %Status
 {
-	q 1
+	#dim sc As %Status = $$$OK
+	set parser = ##class(GraphQL.Parser).%New()
+	try {	
+		set ast = parser.Parse(##class(GraphQL.Source).%New(query))
+	} catch ex {
+		set sc = ex.AsStatus()
+	}
+	quit sc
 }
 
-Method DataTypeFields()
+Method TestDataTypeFields()
 {
 	set query = "{ hero{ name }}"
-	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
-	do $$$AssertStatusNotOK(sc,"Fields is not supported")
+	set sc = ..GetAst(query)
+	//do $$$AssertStatusNotOK(sc,"Fields is not supported")
 	do $$$AssertStatusOK(sc,"Fields is supported")
 }
 
-Method ObjectFields()
+Method TestObjectFields()
 {
 	set query = "{ hero{ name friends{ name }}}"
 	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
@@ -22,7 +29,7 @@ Method ObjectFields()
 	do $$$AssertStatusOK(sc,"Object fields is supported")
 }
 
-Method Arguments()
+Method TestArguments()
 {
 	set query = "{ human(id: ""1000""){ name }}"
 	set sc = $system.Status.DisplayError(##class(GraphQL.Utils.Test).GetAst(query))
@@ -30,7 +37,7 @@ Method Arguments()
 	do $$$AssertStatusOK(sc,"Arguments is supported")
 }
 
-Method Aliases()
+Method TestAliases()
 {
 	set query = "{empireHero: hero(episode: EMPIRE) {name}"_
 				 "jediHero: hero(episode: JEDI) {name}}"
@@ -39,7 +46,7 @@ Method Aliases()
 	do $$$AssertStatusOK(sc,"Aliases is supported")
 }
 
-Method Fragments()
+Method TestFragments()
 {
 	set query = "{"_
 				   "leftComparison: hero(episode: EMPIRE) {...comparisonFields}"_
@@ -57,7 +64,7 @@ Method Fragments()
 	do $$$AssertStatusOK(sc,"Fragments is supported")
 }
 
-Method Variables()
+Method TestVariables()
 {
 	set query = "query HeroNameAndFriends($episode: Episode) {"_
  	 				"hero(episode: $episode) {"_
@@ -72,7 +79,7 @@ Method Variables()
 	do $$$AssertStatusOK(sc,"Variables is supported")
 }
 
-Method DefaultVariables()
+Method TestDefaultVariables()
 {
 	set query = "query HeroNameAndFriends($episode: Episode = ""JEDI"") {"_
  	 				"hero(episode: $episode) {"_
@@ -87,7 +94,7 @@ Method DefaultVariables()
 	do $$$AssertStatusOK(sc,"Default variables is supported")
 }
 
-Method Directives()
+Method TestDirectives()
 {
 	set query = "query Hero($episode: Episode, $withFriends: Boolean!) {"_
  	 				"hero(episode: $episode) {"_
@@ -102,7 +109,7 @@ Method Directives()
 	do $$$AssertStatusOK(sc,"Directives is supported")
 }
 
-Method InlineFragment()
+Method TestInlineFragment()
 {
 	set query = "query HeroForEpisode($ep: Episode!) {"_
 				  "hero(episode: $ep) {"_
@@ -120,7 +127,7 @@ Method InlineFragment()
 	do $$$AssertStatusOK(sc,"Inline fragment is supported")
 }
 
-Method MetaFields()
+Method TestMetaFields()
 {
 	set query = "{search(text: ""an"") {"_
 				    "__typename"_
@@ -140,7 +147,7 @@ Method MetaFields()
 	do $$$AssertStatusOK(sc,"Metaf ields is supported")
 }
 
-Method Mutation()
+Method TestMutation()
 {
 	set query = "mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {"_
   					"createReview(episode: $ep, review: $review) {"_
