@@ -27,7 +27,7 @@ ClassMethod SetSetting(name As %String = "", value As %String = "") As %Status
 	if name = "SCOPECLASS" {
 		if '##class(%Dictionary.ClassDefinition).%ExistsId(value) {
 			set sc = $$$ERROR($$$GeneralError, "Class '" _value _ "' does not exis")
-		} elseif '$classmethod(value,"%IsA", "GraphQL.Scope.Abstract") {
+		} elseif '$classmethod(value,"%Extends", "GraphQL.Scope.Abstract") {
 			set sc = $$$ERROR($$$GeneralError, "Class '" _value _ "' is not a subclass of GraphQL.Scope.Abstract")
 		}
 	} 
