@@ -20,6 +20,20 @@ ClassMethod GetClasses() As %List
 /// This method should return a list of class fields, available for GraphQL 
 ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 {
+	if ($$$classIsPersistent(classname) || $$$classIsSerial(classname))
+	{
+		set list = ""
+		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
+		for i=1:1:class.Properties.Count() 
+		{
+			set property = class.Properties.GetAt(i)
+			if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
+			set list = list _ $lb(property.Name)
+		}
+	}else{
+		quit $$$ERROR($$$GeneralError,"Class: "_classname_" must be %Persistent or %Serial")
+	}
+	quit list
 }
 
 }

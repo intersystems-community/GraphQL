@@ -17,31 +17,36 @@ XData UrlMap
 
 ClassMethod GraphQL()
 {
+	set sc = $$$OK
 	#dim %request as %CSP.Request
 	set query = %request.Content.query
 	set GiQLHASH = $system.Encryption.MD5Hash(query)
 	
 	if GiQLHASH = "ú60t·}RÌë"
 	{	
-		set Schema=##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
-		
-		set Stream = ##class(%Stream.FileCharacter).%New()
-		do Stream.LinkToFile("C:\temp\GQL\schema.json")
-		do Stream.Write(Schema)
-		do Stream.%Save()
-		
-		w Schema
+		w ##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
 	}else{
-		set ast = ##class(GraphQL.Utils.Test).GetAst(query)
-		do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
+		try{
+			set parser = ##class(GraphQL.Parser).%New()
+			set ast = parser.Parse(##class(GraphQL.Source).%New(query))
+			set sc = ##class(GraphQL.Query.Validation).Valid(ast)
+			if (##class(GraphQL.Query.Validation).Valid(ast) = $$$OK)
+			{
+				w ##class(GraphQL.Query.Generate).Start(ast).%ToJSON()
+			}else{
+				w sc
+			}
+		}catch ex{
+			set sc = ex.AsStatus()
+		}
+		//do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
 	}
 
-	return $$$OK
+	return sc
 }
 
 ClassMethod GraphiQL()
 {
-	
 	return 1
 }
 
