@@ -1,4 +1,9 @@
 ROUTINE GraphQLUtils [Type=INC]
+/// GraphQLUtils
+
+/// Redefines $$$TAB macro
+#include %occCPTJSgen
+
 ///enum TOKEN KIND
 #define EOF  1
 #define BANG  2
@@ -68,3 +73,5 @@ ROUTINE GraphQLUtils [Type=INC]
 #define Fields 0
 #define SCALAR "SCALAR"
 #define OBJECT "OBJECT"
+
+#define ClassSQLTable(%c)    ($$$comClassKeyGet(%c,$$$cCLASSsqlschemaname)_"."_$$$comClassKeyGet(%c,$$$cCLASSsqltablename))
