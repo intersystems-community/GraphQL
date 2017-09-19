@@ -36,7 +36,7 @@ Method Hash() As %String [ CodeMode = objectgenerator, ForceGenerate ]
 	}
 	do %code.WriteLine($$$TAB _ "set hash = $system.Encryption.MD5Hash($lb(" _ $lts(properties) _ "))")
 	do %code.WriteLine($$$TAB _ "set base64hash = $system.Encryption.Base64Encode(hash)")
-	do %code.WriteLine($$$TAB _ "quit base64hash")
+	do %code.WriteLine($$$TAB _ "quit $tr(base64hash,""+/="")")
 	quit $$$OK
 }
 

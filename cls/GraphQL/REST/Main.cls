@@ -32,7 +32,7 @@ ClassMethod GraphQL()
 			set sc = ##class(GraphQL.Query.Validation).Valid(ast)
 			if ($$$ISOK(sc))
 			{
-				w ##class(GraphQL.Query.Generate).Start(ast).%ToJSON()
+				w ##class(GraphQL.Query.Executor).Execute(ast).%ToJSON()
 			}
 		}catch ex{
 			set sc = ex.AsStatus()
