@@ -267,7 +267,7 @@ Method GetPositionAfterWhitespace(Body As %String, Start As %Integer) As %Intege
 		{
 			set Position = Position + 1
 		}elseif (Char = "#"){
-			set position = ..WaitForEndOfComment(Body, Position, Char) 
+			set Position = ..WaitForEndOfComment(Body, Position, Char) 
 		}else {
 			return Position
 		}
