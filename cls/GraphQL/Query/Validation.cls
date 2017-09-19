@@ -23,7 +23,7 @@ ClassMethod Definitions(definitions As GraphQL.AST.GraphQLOperationDefinition) A
 	set sc = $$$OK
 	set:'definitions.Directives.%IsNull() sc = ..Directives(definitions.Directives)
 	set:'definitions.VariableDefinitions.%IsNull() sc = ..VariableDefinitions(definitions.VariableDefinitions)
-	quit:definitions.SelectionSet="" $$$NO
+	quit:definitions.SelectionSet="" $$$ERROR($$$GeneralError,"SelectionSet is empty")
 	set sc = ..SelectionSet(definitions.SelectionSet)
 	
 	quit sc
@@ -57,28 +57,28 @@ ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, classNam
 		set:'selections.GetAt(i).Arguments.%IsNull() sc = ..Arguments(selections.GetAt(i).Arguments)
 		set:'selections.GetAt(i).Directives.%IsNull() sc = ..Directives(selections.GetAt(i).Directives)
 		
-		if (((selections.GetAt(i).SelectionSet '= $$$NULL) && (className = $$$NULL)) || 
-			((selections.GetAt(i).SelectionSet '= $$$NULL) && ($find(className,"_")'=0)))
+		if (((selections.GetAt(i).SelectionSet '= $$$NULL) && (className = $$$NULL)))
 		{
-			set className = selections.GetAt(i).Name.Value
-			set sc = ..ValidClassName(className)
-			return:'sc sc
-			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, className)
+			set newClassName = selections.GetAt(i).Name.Value
+			set sc = ..ValidClassName(newClassName)
+			quit:'sc
+			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, newClassName)
 		}
 		elseif ((selections.GetAt(i).SelectionSet '= $$$NULL) && (className '= $$$NULL)){
 			set classObject = selections.GetAt(i).Name.Value
 			set sc = ..ValidClassObjectName(className, classObject, .propertyType)
-			return:'sc sc 
+			quit:'sc  
 			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, propertyType)
 		}
 		elseif ((selections.GetAt(i).SelectionSet = $$$NULL) && (className '= $$$NULL)){
 			set propertyName = selections.GetAt(i).Name.Value
 			continue:$zcvt(propertyName, "U")="ID"
 			set sc = ..ValidClassProperties(propertyName, className)
-			return:'sc sc
+			quit:'sc 
 		}else{
-			return $$$NO
+			return $$$ERROR($$$GeneralError,"No")
 		}
+		//set className = ""
 	}
 	quit sc
 }
@@ -95,6 +95,7 @@ ClassMethod Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
 
 ClassMethod ValidClassName(className As %String) As %Status
 {
+	//w className,","
 	set listOfClass = ..GetClasses()
 	quit:$ListFind(listOfClass, $Replace(className,"_","."))=0 $$$ERROR($$$GeneralError,"Class '"_className_"' dose not exist.")
 	quit $$$OK

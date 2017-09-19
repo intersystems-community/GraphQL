@@ -30,11 +30,9 @@ ClassMethod GraphQL()
 			set parser = ##class(GraphQL.Parser).%New()
 			set ast = parser.Parse(##class(GraphQL.Source).%New(query))
 			set sc = ##class(GraphQL.Query.Validation).Valid(ast)
-			if (##class(GraphQL.Query.Validation).Valid(ast) = $$$OK)
+			if ($$$ISOK(sc))
 			{
 				w ##class(GraphQL.Query.Generate).Start(ast).%ToJSON()
-			}else{
-				w sc
 			}
 		}catch ex{
 			set sc = ex.AsStatus()

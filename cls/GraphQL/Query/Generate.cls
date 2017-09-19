@@ -80,6 +80,7 @@ ClassMethod GenQuery() As %DynamicArray
 		set query = "select top 10 "_properties_" from "_class
 		set $Property(result, class) = ..GetQueryResult(query)
 		set key = $Order(^genquerygbl(key))
+		kill classAndProperties
 	}
 	quit result
 }
