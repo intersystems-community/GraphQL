@@ -5,7 +5,15 @@ Class GraphQL.Query.GenerateClass Extends %RegisteredObject
 
 Property Select As %String;
 
+Property Modifier As %String;
+
+Property OrderBy As %String;
+
+Property ModifierFlag As %String;
+
 Property From As %String;
+
+Property Where As %String;
 
 Property Row As %String;
 
@@ -50,9 +58,10 @@ Method GenerateQueryCode()
 	
 	#dim code As %Stream.TmpCharacter
 	set code = method.Implementation
-	do code.WriteLine($$$TAB _ "set query" _ ..QueryCount _" = []")	
+	do code.WriteLine($$$TAB _ "set query" _ ..QueryCount _" = []" _ $c(10))
+	do code.WriteLine($$$TAB _ "#SQLCOMPILE SELECT=ODBC")
 	do code.WriteLine($$$TAB _ "&sql(DECLARE C" _ ..QueryCount _" CURSOR FOR")
-	do code.WriteLine($$$TAB _ $$$TAB _" SELECT TOP 10 " _ ..Select)
+	do code.WriteLine($$$TAB _ $$$TAB _" SELECT " _ $Select(..Modifier '= "": ..Modifier, 1:"") _ " " _ ..Select)
 	
 	do code.Write($$$TAB _ $$$TAB _ " INTO ")
 	for i = 1:1:..FieldCount.GetAt(..QueryCount) {	
@@ -60,7 +69,10 @@ Method GenerateQueryCode()
 	}
 	do code.WriteLine()
 	
-	do code.WriteLine($$$TAB _$$$TAB _ " FROM " _ ..From _ ")")
+	do code.WriteLine($$$TAB _$$$TAB _ " FROM " _ ..From)
+	do:..Where'="" code.WriteLine($$$TAB _$$$TAB _ " WHERE " _ ..Where)
+	do:..OrderBy'="" code.WriteLine($$$TAB _$$$TAB _ " ORDER BY " _ ..OrderBy)
+	do code.Write(")")
 	do code.WriteLine($$$TAB _ "&sql(OPEN C" _ ..QueryCount _ ")")
 	do code.WriteLine($$$TAB _ "&sql(FETCH C" _ ..QueryCount _ ")")
 	do code.WriteLine($$$TAB _ "While (SQLCODE = 0) {")
@@ -145,6 +157,9 @@ Method StartQuery(queryname As %String, classname As %Dictionary.ClassDefinition
 	set ..From = ##class(%CSP.UI.Portal.SQL.Home).Quoter2($$$ClassSQLTable(classname))
 	set ..Select = ""
 	set ..Row = "{"
+	set ..Where = ""
+	set ..Modifier = ""
+	set ..OrderBy = ""
 	
 	set ..IsFirstField = $$$YES
 	set ..QueryCount = ..QueryCount + 1
@@ -200,17 +215,14 @@ Method AppendField(name As %String, classname As %Dictionary.ClassDefinition, pa
 	set field = "f" _ fieldCount
 	
 	if collection="" {
-		if type = "%Library.Date" {
-			set field = " $ZDate(" _ field _ ", 3)"
-		}
-		
 		set ..Row =  ..Row _ """" _ name _ """:(" _ field _ ")"
 	} else {
 		/// TODO arrays
 		/// TODO lists of dates
 		set ..Row =  ..Row _ """" _ name _ """:(##class(GraphQL.Utils.SQL).ListToArray(" _ field _ "))"
+		set name = "%INTERNAL(" _ name _ ")"
 	}
-	
+		
 	set ..Select = ..Select _ path _ $select(path'="":"_" ,1:"") _ name
 	
 	do ..FieldCount.SetAt(fieldCount, ..QueryCount)
@@ -223,6 +235,7 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 	for i=1:1:selections.Size
 	{
 		set selection = selections.GetAt(i)
+		set arguments = selection.Arguments
 		if (selection.SelectionSet '= "")
 		{
 			if (classname = "") 
@@ -231,6 +244,7 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 				set queryName = selection.Name.Value
 				set queryClassname = $Replace(queryName,"_",".")
 				do ..StartQuery(queryName, queryClassname)
+				set:'arguments.%IsNull() sc = ..Arguments(arguments)
 				set sc = ..SelectionSet(selection.SelectionSet, queryClassname)
 				do ..EndQuery()
 			} else {
@@ -238,6 +252,7 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 				set propertyName = selection.Name.Value
 				set propertyType = $$$comMemberKeyGet(classname,$$$cCLASSproperty,propertyName,$$$cPROPtype)
 				do ..StartObject(propertyName)
+				set:'arguments.%IsNull() sc = ..Arguments(arguments)
 				set sc = ..SelectionSet(selection.SelectionSet, classname, path _ $select(path'="":"_" ,1:"") _ propertyName)
 				do ..EndObject()
 			}
@@ -253,6 +268,30 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 
 Method Arguments(arguments As GraphQL.AST.GraphQLArgument) As %Status
 {
+	set sc = $$$OK
+	set modifier = $LB("first", "last", "after", "before")
+	
+	for i=1:1:arguments.Size
+	{
+		set argument = arguments.GetAt(i)
+		set name = argument.Name.Value
+		set value = argument.Value.Value
+		
+		set ..ModifierFlag = $LF(modifier, name)
+		
+		if ..ModifierFlag '= 0 
+		{
+			if ((..ModifierFlag = 1) || (..ModifierFlag = 2)) {set ..Modifier = ..Modifier _" TOP " _ value}
+			set:..ModifierFlag=2 ..OrderBy = ..OrderBy _ "%ID DESC"
+			set:..ModifierFlag=3 ..Where = ..Where _ " %ID > '" _ value _ "' AND "
+			set:..ModifierFlag=4 ..Where = ..Where _ " %ID < '" _ value _ "' AND "
+			continue
+		}
+
+		set ..Where = ..Where _ name _ "= '" _ value _ "' AND "
+	}
+	set ..Where = $Extract(..Where, 1, * - 4)
+
 	quit $$$OK
 }
 

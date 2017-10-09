@@ -1,2 +1,3 @@
 ROUTINE ForBebug
-	do ##class(GraphQL.Utils.Test).Test()
+	set parser = ##class(GraphQL.Parser).%New()
+	set ast = parser.Parse(##class(GraphQL.Source).%New("query { Sample_Person {Name Home {State} Id}} Sample_Employee {id}}"))

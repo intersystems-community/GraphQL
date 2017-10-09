@@ -28,7 +28,7 @@ ClassMethod GraphQL()
 	}else{
 		try{
 			set parser = ##class(GraphQL.Parser).%New()
-			set ast = parser.Parse(##class(GraphQL.Source).%New(query))
+			#dim ast As GraphQL.AST.ASTNode = parser.Parse(##class(GraphQL.Source).%New(query))
 			set sc = ##class(GraphQL.Query.Validation).Valid(ast)
 			if ($$$ISOK(sc))
 			{
@@ -38,6 +38,7 @@ ClassMethod GraphQL()
 			set sc = ex.AsStatus()
 		}
 		//do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
+		//zw ast.Definitions.GetAt(1).SelectionSet.Selections.GetAt(1).Arguments.GetAt(1).Kind
 	}
 
 	return sc

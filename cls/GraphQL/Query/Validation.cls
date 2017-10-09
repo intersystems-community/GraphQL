@@ -52,21 +52,20 @@ ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, classNam
 	set sc = $$$OK
 	
 	for i=1:1:selections.Size
-	{
-		set:selections.GetAt(i).Alias'=$$$NULL sc = ..Alias(selections.GetAt(i).Alias)
-		set:'selections.GetAt(i).Arguments.%IsNull() sc = ..Arguments(selections.GetAt(i).Arguments)
-		set:'selections.GetAt(i).Directives.%IsNull() sc = ..Directives(selections.GetAt(i).Directives)
-		
+	{	
 		if (((selections.GetAt(i).SelectionSet '= $$$NULL) && (className = $$$NULL)))
 		{
 			set newClassName = selections.GetAt(i).Name.Value
 			set sc = ..ValidClassName(newClassName)
+			set sc = ..ArgsAliasDirectives(selections, newClassName, i)
 			quit:'sc
 			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, newClassName)
 		}
 		elseif ((selections.GetAt(i).SelectionSet '= $$$NULL) && (className '= $$$NULL)){
 			set classObject = selections.GetAt(i).Name.Value
+			set newClassName = className
 			set sc = ..ValidClassObjectName(className, classObject, .propertyType)
+			set sc = ..ArgsAliasDirectives(selections, newClassName, i)
 			quit:'sc  
 			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, propertyType)
 		}
@@ -78,14 +77,55 @@ ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, classNam
 		}else{
 			return $$$ERROR($$$GeneralError,"No")
 		}
-		//set className = ""
 	}
 	quit sc
 }
 
-ClassMethod Arguments(arguments As GraphQL.AST.GraphQLArgument) As %Status
+ClassMethod ArgsAliasDirectives(selections As GraphQL.AST.GraphQLFieldSelection, className As %String = "", i As %Integer) As %Status
 {
-	quit $$$OK
+	set sc = $$$OK
+	set:selections.GetAt(i).Alias'=$$$NULL sc = ..Alias(selections.GetAt(i).Alias)
+	set:'selections.GetAt(i).Arguments.%IsNull() sc = ..Arguments(selections.GetAt(i).Arguments, $Replace(className,"_","."))
+	set:'selections.GetAt(i).Directives.%IsNull() sc = ..Directives(selections.GetAt(i).Directives)
+	quit sc
+}
+
+ClassMethod Arguments(arguments As GraphQL.AST.GraphQLArgument, className As %String) As %Status
+{
+	set sc = $$$OK
+	set modifier = $LB("first", "last", "after", "before")
+	
+	for i=1:1:arguments.Size
+	{	
+		set argument = arguments.GetAt(i)
+		set argName = argument.Name.Value
+		set argValue = argument.Value.Value
+		
+		if ($ListFind(modifier, argName)>0) && ($IsValidNum(argValue, 0))
+		{
+			continue
+		}elseif ($ListFind(modifier, argName)>0) && ('$IsValidNum(argValue, 0))
+		{
+			return $$$ERROR($$$GeneralError,"Argument '"_argName_"' is not valid in class "_className)
+		}
+
+		continue:$zcvt(argName, "U")="ID"
+		
+		set propExist = ##class(%Dictionary.CompiledPropertyMethod).IDKEYExists(className_"||"_argName, "IsValid")
+		return:'propExist $$$ERROR($$$GeneralError,"Property name '"_argName_"' does not exist in class "_className)
+		
+		if ##class(%Dictionary.CompiledPropertyMethod).IDKEYExists(className_"||"_argName, "OdbcToLogical")
+		{
+			set storedArgValue = $classmethod(className, argName_"OdbcToLogical", argValue)	
+		}else{
+			set storedArgValue = argValue
+		}
+		
+		set sc = $classmethod(className, argName_"IsValid", storedArgValue)
+		return:'sc $$$ADDSC(sc, $$$ERROR($$$GeneralError,"Argument '"_argName_"' is not valid in class "_className))
+	}
+
+	quit sc
 }
 
 ClassMethod Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
@@ -95,23 +135,22 @@ ClassMethod Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
 
 ClassMethod ValidClassName(className As %String) As %Status
 {
-	//w className,","
 	set listOfClass = ..GetClasses()
-	quit:$ListFind(listOfClass, $Replace(className,"_","."))=0 $$$ERROR($$$GeneralError,"Class '"_className_"' dose not exist.")
+	quit:$ListFind(listOfClass, $Replace(className,"_","."))=0 $$$ERROR($$$GeneralError,"Class '"_className_"' does not exist.")
 	quit $$$OK
 }
 
 ClassMethod ValidClassObjectName(className As %String, propertyName As %String, Output propertyType) As %Status
 {
 	set propertyType = $$$comMemberKeyGet($Replace(className,"_","."),$$$cCLASSproperty,propertyName,$$$cPROPtype)
-	quit:propertyType="" $$$ERROR($$$GeneralError,"This property '"_propertyName_"' dose not exist in class '"_className_"' or class type for this property.")
+	quit:propertyType="" $$$ERROR($$$GeneralError,"Property '"_propertyName_"' does not exist in class '"_className_"' or class type for this property.")
 	quit $$$OK
 }
 
 ClassMethod ValidClassProperties(propertyName As %String, className As %String) As %Status
 {
 	set listOfProperties = ..GetProperties($Replace(className,"_","."))
-	quit:$ListFind(listOfProperties, $Replace(propertyName,"_","."))=0 $$$ERROR($$$GeneralError,"This property '"_propertyName_"' dose not exist in class '"_className_"'.")
+	quit:$ListFind(listOfProperties, $Replace(propertyName,"_","."))=0 $$$ERROR($$$GeneralError,"Property '"_propertyName_"' does not exist in class '"_className_"'.")
 	quit $$$OK
 }
 

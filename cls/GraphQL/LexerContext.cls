@@ -25,7 +25,9 @@ Method GetToken() As Token
 	set Unicode = ..IfUnicodeGetString()
 	
 	set Char = $Extract(..Source.Body, ..CurrentIndex)
-
+	
+	if Char = "}" break
+	
 	do ..ValidateCharacterCode(Char)
 	
 	set Token = ..CheckForPunctuationTokens(Char)

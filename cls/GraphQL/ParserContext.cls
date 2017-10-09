@@ -59,9 +59,12 @@ Method ParseDefinition() As GraphQL.AST.ASTNode
 	if (..Peek($$$NAME))
 	{
 		set ParseNamedDefinition = ..ParseNamedDefinition()
-		return $Get(ParseNamedDefinition)
+		if (ParseNamedDefinition '= $$$NULL) {
+			return ParseNamedDefinition
+		}
 	}
-	throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unexpected "_..CurrentToken_": "_NextChar,..Source,..CurrentToken.Start)
+	
+	throw ##class(GraphQL.Exceptions.GraphQLSyntaxErrorException).Get("Unexpected token '"_..CurrentToken.GetTokenKindDescription(..CurrentToken.Kind)_"'",..Source,..CurrentToken.Start)
 }
 
 Method Peek(Kind) As %Boolean [ CodeMode = expression ]
