@@ -222,8 +222,11 @@ Method AppendField(name As %String, classname As %Dictionary.ClassDefinition, pa
 		set ..Row =  ..Row _ """" _ name _ """:(##class(GraphQL.Utils.SQL).ListToArray(" _ field _ "))"
 		set name = "%INTERNAL(" _ name _ ")"
 	}
-		
-	set ..Select = ..Select _ path _ $select(path'="":"_" ,1:"") _ name
+	
+	if (path '= "") {
+		set objType = $$$comMemberKeyGet(classname,$$$cCLASSproperty,path,$$$cPROPtype)
+	}
+	set ..Select = ..Select _ path _ $select(path'="":$select($$$classIsSerial(objType):"_",$$$classIsPersistent(objType):"->") ,1:"") _ name
 	
 	do ..FieldCount.SetAt(fieldCount, ..QueryCount)
 }
@@ -301,4 +304,3 @@ Method Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
 }
 
 }
-
