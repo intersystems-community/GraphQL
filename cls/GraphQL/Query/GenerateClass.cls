@@ -9,8 +9,6 @@ Property Modifier As %String;
 
 Property OrderBy As %String;
 
-Property ModifierFlag As %String;
-
 Property From As %String;
 
 Property Where As %String;
@@ -25,9 +23,17 @@ Property ClassList As list Of %Dictionary.CacheClassname;
 
 Property QueryCount As %Integer [ InitialExpression = 0 ];
 
+Property SubQueryCount As %Integer [ InitialExpression = 0 ];
+
+Property ArgCount As %Integer [ InitialExpression = 0 ];
+
 Property FieldCount As list Of %Integer;
 
 Property IsFirstField As %Boolean [ InitialExpression = {$$$YES} ];
+
+Property IsRelationship As %Boolean [ InitialExpression = {$$$NO} ];
+
+Property IsManyCardinality As %Boolean [ InitialExpression = {$$$NO} ];
 
 Method %OnNew(classname As %Dictionary.CacheClassname) As %Status [ Private, ServerOnly = 1 ]
 {
@@ -55,6 +61,13 @@ Method GenerateQueryCode()
 {
 	#dim method As %Dictionary.MethodDefinition
 	set method = ..Class.Methods.GetAt(1)
+	
+	set argList = ""
+	for i=1:1:..ArgCount
+	{
+		set argList = argList_$lb("arg"_i) 
+	}
+	set method.FormalSpec = $lts(argList)
 	
 	#dim code As %Stream.TmpCharacter
 	set code = method.Implementation
@@ -197,7 +210,7 @@ Method EndObject(classname As %Dictionary.ClassDefinition)
 	set ..IsFirstField = $$$NO
 }
 
-Method AppendField(name As %String, classname As %Dictionary.ClassDefinition, path As %String = "")
+Method AppendField(name As %String, classname As %Dictionary.ClassDefinition, path As %String = "", propName As %String = "")
 {
 	set fieldCount = ..FieldCount.GetAt(..QueryCount) + 1
 	if ..IsFirstField {
@@ -206,27 +219,26 @@ Method AppendField(name As %String, classname As %Dictionary.ClassDefinition, pa
 		set ..Row = ..Row _ ", "
 	}
 	
-	if fieldCount>1 {
+	if (fieldCount>1){
 		set ..Select = ..Select _ ", "
 	}
 	set collection = $$$comMemberKeyGet(classname,$$$cCLASSproperty,name,$$$cPROPcollection)
 	set type = $$$comMemberKeyGet(classname,$$$cCLASSproperty,name,$$$cPROPtype)
 	
 	set field = "f" _ fieldCount
+	set select = ""
+	set select = path _ $select(path'="":$select($$$classIsSerial(classname):"_",$$$classIsPersistent(classname):"->",$$$classIsDataType(classname):"_") ,1:"") _ name
 	
 	if collection="" {
 		set ..Row =  ..Row _ """" _ name _ """:(" _ field _ ")"
-	} else {
+	}else {
 		/// TODO arrays
 		/// TODO lists of dates
 		set ..Row =  ..Row _ """" _ name _ """:(##class(GraphQL.Utils.SQL).ListToArray(" _ field _ "))"
-		set name = "%INTERNAL(" _ name _ ")"
+		set select = "%INTERNAL(" _ select _ ")"
 	}
-	
-	if (path '= "") {
-		set objType = $$$comMemberKeyGet(classname,$$$cCLASSproperty,path,$$$cPROPtype)
-	}
-	set ..Select = ..Select _ path _ $select(path'="":$select($$$classIsSerial(objType):"_",$$$classIsPersistent(objType):"->") ,1:"") _ name
+
+	set ..Select = ..Select _ select
 	
 	do ..FieldCount.SetAt(fieldCount, ..QueryCount)
 }
@@ -239,6 +251,7 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 	{
 		set selection = selections.GetAt(i)
 		set arguments = selection.Arguments
+		
 		if (selection.SelectionSet '= "")
 		{
 			if (classname = "") 
@@ -253,17 +266,24 @@ Method Selections(selections As %ListOfObjectsWithClassName, classname = "", pat
 			} else {
 				// object fields
 				set propertyName = selection.Name.Value
+				
+				set ..IsRelationship = $$$comMemberKeyGet(classname,$$$cCLASSproperty,propertyName,$$$cPROPrelationship)
+				set cardinality = $$$comMemberKeyGet(classname,$$$cCLASSproperty, propertyName, $$$cPROPcardinality)
+				set ..IsManyCardinality = $s((cardinality = "many") || (cardinality = "children"): 1, 1: 0)
+				
 				set propertyType = $$$comMemberKeyGet(classname,$$$cCLASSproperty,propertyName,$$$cPROPtype)
 				do ..StartObject(propertyName)
 				set:'arguments.%IsNull() sc = ..Arguments(arguments)
-				set sc = ..SelectionSet(selection.SelectionSet, classname, path _ $select(path'="":"_" ,1:"") _ propertyName)
+				set sc = ..SelectionSet(selection.SelectionSet, propertyType, path _ $select(path'="":$select($$$classIsSerial(classname):"_",$$$classIsPersistent(classname):"->",$$$classIsDataType(classname):"_") ,1:"") _ propertyName)
 				do ..EndObject()
 			}
 		}
 		elseif ((selection.SelectionSet = "") && (classname '= ""))
 		{
-			// datatype fields
+			//// datatype fields
 			do ..AppendField(selection.Name.Value, classname, path)
+			set ..IsRelationship = $$$NO
+			set ..IsManyCardinality = $$$NO
 		}
 	}
 	quit sc
@@ -276,22 +296,23 @@ Method Arguments(arguments As GraphQL.AST.GraphQLArgument) As %Status
 	
 	for i=1:1:arguments.Size
 	{
+		set ..ArgCount = ..ArgCount + 1
 		set argument = arguments.GetAt(i)
 		set name = argument.Name.Value
-		set value = argument.Value.Value
+		set value = ":arg"_..ArgCount
 		
-		set ..ModifierFlag = $LF(modifier, name)
+		set modifierFlag = $LF(modifier, name)
 		
-		if ..ModifierFlag '= 0 
+		if modifierFlag '= 0 
 		{
-			if ((..ModifierFlag = 1) || (..ModifierFlag = 2)) {set ..Modifier = ..Modifier _" TOP " _ value}
-			set:..ModifierFlag=2 ..OrderBy = ..OrderBy _ "%ID DESC"
-			set:..ModifierFlag=3 ..Where = ..Where _ " %ID > '" _ value _ "' AND "
-			set:..ModifierFlag=4 ..Where = ..Where _ " %ID < '" _ value _ "' AND "
+			if ((modifierFlag = 1) || (modifierFlag = 2)) {set ..Modifier = ..Modifier _" TOP " _ value}
+			set:modifierFlag=2 ..OrderBy = ..OrderBy _ "%ID DESC"
+			set:modifierFlag=3 ..Where = ..Where _ " %ID > " _ value _ " AND "
+			set:modifierFlag=4 ..Where = ..Where _ " %ID < " _ value _ " AND "
 			continue
 		}
 
-		set ..Where = ..Where _ name _ "= '" _ value _ "' AND "
+		set ..Where = ..Where _ name _ "= " _ value _ " AND "
 	}
 	set ..Where = $Extract(..Where, 1, * - 4)
 
@@ -303,4 +324,18 @@ Method Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
 	quit $$$OK
 }
 
+ClassMethod GetPosition(class As %Dictionary.CacheClassname, property As %Dictionary.CacheIdentifier) As %Integer
+{
+    set strategy = $$$comClassKeyGet(class, $$$cCLASSstoragestrategy)    
+    set strategyId  = class _ "||" _ strategy
+    &sql(SELECT Name INTO :position
+         FROM %Dictionary.StorageDataValueDefinition
+         WHERE parent = (SELECT ID
+                         FROM %Dictionary.StorageDataDefinition
+                         WHERE parent = :strategyId AND Structure = 'listnode')
+         AND Value = :property)
+    quit position
 }
+
+}
+
