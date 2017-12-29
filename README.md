@@ -16,7 +16,7 @@ GraphQL implementation for Caché
     - Name - `/graphiql`
     - Namespace - your target namespace, f.e. `SAMPLES`
     - CSP Files Physical Path - f.e. `C:\InterSystems\GraphiQL\`
-## Exemple
+## Example
 Query and Result
 
 ![sample](https://pp.userapi.com/c837337/v837337052/61752/mXbbCHhBl9M.jpg)     ![sample](https://pp.userapi.com/c837337/v837337052/6173c/6elLjldPiRA.jpg) 
