@@ -1,6 +1,8 @@
 # GraphQL
 GraphQL implementation for Caché
 
+[![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ)
+
 ## Install GraphQL
 1) Download the [last release](https://github.com/intersystems-ru/GraphQL/releases).
 2) Import it to the target Caché namespace, f.e. to `SAMPLES`.
