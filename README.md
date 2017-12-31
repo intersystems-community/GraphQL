@@ -13,7 +13,7 @@
     - Dispatch Class - `GraphQL.REST.Main`
 
 
-## Install GrapiQL
+## Install GraphiQL
 1) Use an [available release](https://github.com/intersystems-ru/GraphQL/releases) or [build](https://github.com/graphql/graphiql) it on your own
 2) Create new web aplication:
     - Name - `/graphiql`
