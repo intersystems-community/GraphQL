@@ -1,5 +1,8 @@
-# GraphQL
-GraphQL implementation for Caché
+# GraphQL implementation for Caché
+
+
+[![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ)
+
 
 ## Install GraphQL
 1) Download the [last release](https://github.com/intersystems-ru/GraphQL/releases).
@@ -10,13 +13,13 @@ GraphQL implementation for Caché
     - Dispatch Class - `GraphQL.REST.Main`
 
 
-## Install GrapiQL
+## Install GraphiQL
 1) Use an [available release](https://github.com/intersystems-ru/GraphQL/releases) or [build](https://github.com/graphql/graphiql) it on your own
 2) Create new web aplication:
     - Name - `/graphiql`
     - Namespace - your target namespace, f.e. `SAMPLES`
     - CSP Files Physical Path - f.e. `C:\InterSystems\GraphiQL\`
-## Exemple
+## Example
 Query and Result
 
 ![sample](https://pp.userapi.com/c837337/v837337052/61752/mXbbCHhBl9M.jpg)     ![sample](https://pp.userapi.com/c837337/v837337052/6173c/6elLjldPiRA.jpg) 
