@@ -64,11 +64,13 @@ ClassMethod GetArgsOrFields(class As %Dictionary.CompiledClass, flag As %Boolean
 			do argsOrFields.%Push(..GetIDforFields())
 		}
 	}
+	set propList = $classmethod(##class(GraphQL.Settings).GetSetting("SCOPECLASS"), "GetProperties", class.Name)
 	for i=1:1:class.Properties.Count() 
 	{
 		set property = class.Properties.GetAt(i)
 		
 		if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
+		continue:$lf(propList,property.Name)=0
 		
 		if ((flag = $$$Args) && (..GetKind(property.Type) = $$$SCALAR))
 		{
@@ -224,9 +226,13 @@ ClassMethod GetRootField(classname As %String) As %DynamicObject [ CodeMode = ex
 /// zw ##class(GraphQL.Utils.Schema).GetClassRelatedTypes("Sample.Employee")
 ClassMethod GetClassRelatedTypes(classname As %Dictionary.CacheClassname) As %List
 {
+	set relatedTypes = ""
+	set propList = $classmethod(##class(GraphQL.Settings).GetSetting("SCOPECLASS"), "GetProperties", classname)
 	&sql(SELECT 
 		%DLIST(Distinct Type) INTO :relatedTypes
-		FROM %Dictionary.CompiledProperty where parent = :classname)
+		FROM %Dictionary.CompiledProperty 
+		where parent = :classname and name %InList :propList
+		)
 	quit relatedTypes
 }
 

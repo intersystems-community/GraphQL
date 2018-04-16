@@ -1,11 +1,13 @@
-Class GraphQL.Scope.All Extends Abstract
+Class GraphQL.Scope.Package Extends Abstract
 {
+
+Parameter Package = {"DeepSee"};
 
 /// This method should return a list of classes, available for GraphQL 
 ClassMethod GetClasses() As %List
 {
 	set list = ""
-	set rs = ##class(%Dictionary.ClassDefinitionQuery).SubclassOfFunc("%Library.Persistent")
+	set rs = ..SubclassesListFunc()
 	while rs.%Next() 
 	{
 		set classname = rs.Name
@@ -19,16 +21,14 @@ ClassMethod GetClasses() As %List
 }
 
 /// This method should return a list of class fields, available for GraphQL 
-/// zw ##class(GraphQL.Scope.All).GetProperties()
 ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 {
-	if ($$$classIsPersistent(classname) || $$$classIsSerial(classname))
-	{
+	if ($$$classIsPersistent(classname))
+	{	
 		set list = ""
 		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 		for i=1:1:class.Properties.Count() 
 		{
-			
 			set property = class.Properties.GetAt(i)
 			set type = property.Type
 			if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
@@ -37,9 +37,16 @@ ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 			set list = list _ $lb(property.Name)
 		}
 	}else{
-		quit $$$ERROR($$$GeneralError,"Class: "_classname_" must be %Persistent or %Serial")
+		quit $$$ERROR($$$GeneralError,"Class: "_classname_" must by %Persystent")
 	}
 	quit list
+}
+
+Query SubclassesList(Package = {..#Package}) As %SQLQuery
+{
+SELECT  DISTINCT name
+FROM %Dictionary.ClassDefinitionQuery_SubclassOf('%Library.Persistent')
+where $piece(name,'.',1)= :Package
 }
 
 }

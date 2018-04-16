@@ -1,3 +1,5 @@
 ROUTINE ForBebug
 	set parser = ##class(GraphQL.Parser).%New()
-	set ast = parser.Parse(##class(GraphQL.Source).%New("query { Sample_Person {Name Home {State} Id}} Sample_Employee {id}}"))
+	#dim ast As GraphQL.AST.ASTNode = parser.Parse(##class(GraphQL.Source).%New("{Sample_Company{id  Name}}"))
+	w ##class(GraphQL.Query.Executor).Execute(ast).%ToJSON()
+	

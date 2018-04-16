@@ -12,6 +12,7 @@ ClassMethod GetClasses() As %List
 	{
 		set classname = rs.Name
 		continue:$e(classname)="%"
+		continue:$$$defClassKeyGet(classname,$$$cCLASSgeneratedby)'=""
 		continue:$$$defClassKeyGet(classname, $$$cCLASSsystem)'=0 // Skip system classes
 		continue:'$$$comClassDefined(classname) // TODO fix for mapped classes
 		set list = list _ $lb(classname)
@@ -24,12 +25,17 @@ ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 {
 	if ($$$classIsPersistent(classname))
 	{
+		set list = ""
 		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 		for i=1:1:class.Properties.Count() 
 		{
+			
 			set property = class.Properties.GetAt(i)
+			set type = property.Type
 			if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
-			set list = list _ $lb(property)
+			continue:'($$$classIsPersistent(type) || $$$classIsSerial(type) || $$$classIsStream(type) || $$$classIsDataType(type))
+			continue:type="%Library.RegisteredObject"
+			set list = list _ $lb(property.Name)
 		}
 	}else{
 		quit $$$ERROR($$$GeneralError,"Class: "_classname_" must by %Persystent")

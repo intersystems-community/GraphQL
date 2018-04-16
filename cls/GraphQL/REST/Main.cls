@@ -20,11 +20,14 @@ ClassMethod GraphQL()
 	set sc = $$$OK
 	#dim %request as %CSP.Request
 	set query = %request.Content.query
-	set GiQLHASH = $system.Encryption.MD5Hash(query)
-	
-	if GiQLHASH = "ú60t·}RÌë"
+	set GiQLHASH = $system.Encryption.Base64Encode($system.Encryption.MD5Hash(query))
+	if GiQLHASH = "ABURmBQ3tap6wGcPz3hLSw=="
 	{	
-		w ##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
+		try{
+			w ##class(GraphQL.Utils.Schema).GetSchema().%ToJSON()
+		}catch ex{
+			set sc = ex.AsStatus()
+		}
 	}else{
 		try{
 			set parser = ##class(GraphQL.Parser).%New()
