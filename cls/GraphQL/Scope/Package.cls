@@ -1,7 +1,7 @@
 Class GraphQL.Scope.Package Extends Abstract
 {
 
-Parameter Package = {"DeepSee"};
+Parameter Package = {"Sample"};
 
 /// This method should return a list of classes, available for GraphQL 
 ClassMethod GetClasses() As %List
@@ -23,15 +23,16 @@ ClassMethod GetClasses() As %List
 /// This method should return a list of class fields, available for GraphQL 
 ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 {
-	if ($$$classIsPersistent(classname))
-	{	
+	if ($$$classIsPersistent(classname) || $$$classIsSerial(classname))
+	{
 		set list = ""
 		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 		for i=1:1:class.Properties.Count() 
 		{
 			set property = class.Properties.GetAt(i)
-			set type = property.Type
 			if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
+			set type = property.Type
+			//continue:$extract(property)="%"
 			continue:'($$$classIsPersistent(type) || $$$classIsSerial(type) || $$$classIsStream(type) || $$$classIsDataType(type))
 			continue:type="%Library.RegisteredObject"
 			set list = list _ $lb(property.Name)

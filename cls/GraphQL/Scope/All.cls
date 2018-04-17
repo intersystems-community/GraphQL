@@ -28,10 +28,10 @@ ClassMethod GetProperties(classname As %Dictionary.CacheClassname) As %List
 		set class = ##class(%Dictionary.CompiledClass).%OpenId(classname)
 		for i=1:1:class.Properties.Count() 
 		{
-			
 			set property = class.Properties.GetAt(i)
-			set type = property.Type
 			if property.Internal || property.Calculated || property.ReadOnly || property.Private || property.Identity continue
+			set type = property.Type
+			//continue:$extract(property)="%"
 			continue:'($$$classIsPersistent(type) || $$$classIsSerial(type) || $$$classIsStream(type) || $$$classIsDataType(type))
 			continue:type="%Library.RegisteredObject"
 			set list = list _ $lb(property.Name)
