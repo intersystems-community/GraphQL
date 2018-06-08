@@ -1,4 +1,4 @@
-# GraphQL implementation for Caché
+# GraphQL implementation for InterSystems Data Platforms
 
 
 [![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ)
