@@ -77,7 +77,7 @@ Method ReadNumber() As Token
 		set Char = ..ReadDigitsFromOwnSource(..NextChar())
 	}
 	
-	if (Char = "E" || Char = "e")
+	if (Char = "E") || (Char = "e")
 	{
 		set IsFloat = 1
 		set Char = ..NextChar()
