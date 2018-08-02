@@ -1,7 +1,10 @@
 # GraphQL implementation for InterSystems Data Platforms
 
 
-[![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ)
+[![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ) 
+[![Gitter](https://img.shields.io/badge/article-on%20community-blue.svg)](https://community.intersystems.com/post/graphql-intersystems-data-platforms)
+[![Gitter](https://img.shields.io/badge/demo-server-green.svg)](http://37.139.6.217:57773/graphiql/index.html)
+
 
 
 ## Install GraphQL
@@ -27,3 +30,85 @@ Query and Result
 ![sample](https://pp.userapi.com/c837337/v837337052/61761/vPCZvIXgcJk.jpg)     ![sample](https://pp.userapi.com/c837337/v837337052/6174b/Zd2000W64HI.jpg) 
 
 
+## Example queries for copy and past on [demo server](http://37.139.6.217:57773/graphiql/index.html):
+
+**Queries can be simple and complex for several sets of data**
+```graphql
+{
+  Sample_Person{
+    Name
+    DOB
+    FavoriteColors
+    Office {
+      City
+      State
+      Street
+      Zip
+    }
+  }
+  Sample_Company{
+    Mission
+    Name
+    Revenue
+  }
+}
+```
+
+**Filtering**
+
+At the moment, only strict equality is supported:
+
+```graphql
+{
+  Sample_Person(id: 116){
+    id
+    Name
+    DOB
+    FavoriteColors
+    Home {
+      City
+      State
+      Street
+      Zip
+    }
+    Office {
+      City
+      State
+      Street
+      Zip
+    }
+  }
+}
+```
+
+**Pagination**
+
+Pagination is supported through 4 functions that can be combined to achieve the necessary result:
+
+- after: n – all records with id greater than n
+- before: n – all records with id smaller than n
+- first: n – first n records
+- last: n – last n records
+
+```graphql
+{
+  Sample_Employee(after: 120, before: 123){
+    id 
+    Name
+  }
+  
+  Sample_Person(first: 2){
+    id
+    Home {
+      City
+      State
+      Street
+      Zip
+    }
+  }
+  Sample_Company(last: 3){
+    id 
+    Name
+  }
+}
+```
