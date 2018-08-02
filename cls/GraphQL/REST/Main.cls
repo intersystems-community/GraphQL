@@ -41,7 +41,6 @@ ClassMethod GraphQL()
 			set sc = ex.AsStatus()
 		}
 		//do ##class(%ZEN.Auxiliary.jsonProvider).%ObjectToJSON(ast,,,"bioaeqltw")
-		//zw ast.Definitions.GetAt(1).SelectionSet.Selections.GetAt(1).Arguments.GetAt(1).Kind
 	}
 
 	return sc

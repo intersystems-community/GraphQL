@@ -35,6 +35,8 @@ Property IsRelationship As %Boolean [ InitialExpression = {$$$NO} ];
 
 Property IsManyCardinality As %Boolean [ InitialExpression = {$$$NO} ];
 
+Property Context As list Of %Dictionary.MethodDefinition;
+
 Method %OnNew(classname As %Dictionary.CacheClassname) As %Status [ Private, ServerOnly = 1 ]
 {
 	set ..Class = ..GenerateClass(classname)
@@ -68,7 +70,7 @@ Method GenerateQueryCode()
 		set argList = argList_$lb("arg"_i) 
 	}
 	set method.FormalSpec = $lts(argList)
-	
+
 	#dim code As %Stream.TmpCharacter
 	set code = method.Implementation
 	do code.WriteLine($$$TAB _ "set query" _ ..QueryCount _" = []" _ $c(10))

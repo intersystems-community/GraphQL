@@ -1,6 +1,6 @@
 Include GraphQLUtils
 
-Class GraphQL.Query.Validation Extends GraphQL.Scope.All
+Class GraphQL.Query.Validation
 {
 
 /// do ##class(GraphQL.Query.Validation).Valid()
@@ -39,7 +39,7 @@ ClassMethod VariableDefinitions(variable As GraphQL.AST.GraphQLVariableDefinitio
 	quit $$$OK
 }
 
-ClassMethod SelectionSet(selectionSet As GraphQL.AST.GraphQLSelectionSet, className As %String = "") As %Status
+ClassMethod SelectionSet(selectionSet As GraphQL.AST.GraphQLSelectionSet, className As %String = {$$$NULL}) As %Status
 {
 	set sc = $$$OK
 	quit:selectionSet.Selections.%IsNull() $$$ERROR($$$GeneralError,"Properties for class '"_className_"'not specified")
@@ -47,7 +47,7 @@ ClassMethod SelectionSet(selectionSet As GraphQL.AST.GraphQLSelectionSet, classN
 	quit sc
 }
 
-ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, className As %String = "") As %Status
+ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, className As %String = {$$$NULL}) As %Status
 {
 	set sc = $$$OK
 	
@@ -57,11 +57,13 @@ ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, classNam
 		{
 			set newClassName = selections.GetAt(i).Name.Value
 			set sc = ..ValidClassName(newClassName)
+			return:sc'=1 sc
 			set sc = ..ArgsAliasDirectives(selections, newClassName, i)
-			quit:'sc
+			return:sc'=1 sc 
 			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, newClassName)
 		}
-		elseif ((selections.GetAt(i).SelectionSet '= $$$NULL) && (className '= $$$NULL)){
+		elseif ((selections.GetAt(i).SelectionSet '= $$$NULL) && (className '= $$$NULL))
+		{
 			set classObject = selections.GetAt(i).Name.Value
 			set newClassName = className
 			set sc = ..ValidClassObjectName(className, classObject, .propertyType)
@@ -69,12 +71,13 @@ ClassMethod Selections(selections As GraphQL.AST.GraphQLFieldSelection, classNam
 			quit:'sc  
 			set sc = ..SelectionSet(selections.GetAt(i).SelectionSet, propertyType)
 		}
-		elseif ((selections.GetAt(i).SelectionSet = $$$NULL) && (className '= $$$NULL)){
+		elseif ((selections.GetAt(i).SelectionSet = $$$NULL) && (className '= $$$NULL))
+		{
 			set propertyName = selections.GetAt(i).Name.Value
 			continue:$zcvt(propertyName, "U")="ID"
 			set sc = ..ValidClassProperties(propertyName, className)
 			quit:'sc 
-		}else{
+		}else {
 			return $$$ERROR($$$GeneralError,"No")
 		}
 	}
@@ -112,7 +115,7 @@ ClassMethod Arguments(arguments As GraphQL.AST.GraphQLArgument, className As %St
 		continue:$zcvt(argName, "U")="ID"
 		
 		set propExist = ##class(%Dictionary.CompiledPropertyMethod).IDKEYExists(className_"||"_argName, "IsValid")
-		return:'propExist $$$ERROR($$$GeneralError,"Property name '"_argName_"' does not exist in class "_className)
+		return:'propExist $$$ERROR($$$GeneralError,"Argument '"_argName_"' does not exist in class "_className)
 		
 		if ##class(%Dictionary.CompiledPropertyMethod).IDKEYExists(className_"||"_argName, "OdbcToLogical")
 		{
@@ -135,7 +138,8 @@ ClassMethod Alias(alias As GraphQL.AST.GraphQLFieldSelection) As %Status
 
 ClassMethod ValidClassName(className As %String) As %Status
 {
-	set listOfClass = ..GetClasses()
+	set scopeClass = ##class(GraphQL.Settings).#SCOPECLASS
+	set listOfClass = $classmethod(scopeClass,"GetClasses")
 	quit:$ListFind(listOfClass, $Replace(className,"_","."))=0 $$$ERROR($$$GeneralError,"Class '"_className_"' does not exist.")
 	quit $$$OK
 }
@@ -149,7 +153,8 @@ ClassMethod ValidClassObjectName(className As %String, propertyName As %String, 
 
 ClassMethod ValidClassProperties(propertyName As %String, className As %String) As %Status
 {
-	set listOfProperties = ..GetProperties($Replace(className,"_","."))
+	set scopeClass = ##class(GraphQL.Settings).#SCOPECLASS
+	set listOfProperties = $classmethod(scopeClass,"GetProperties", $Replace(className,"_","."))
 	quit:$ListFind(listOfProperties, $Replace(propertyName,"_","."))=0 $$$ERROR($$$GeneralError,"Property '"_propertyName_"' does not exist in class '"_className_"'.")
 	quit $$$OK
 }
