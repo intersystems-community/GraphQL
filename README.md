@@ -41,7 +41,7 @@ Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installi
 Clone/git pull the repo into any local directory
 
 ```
-$ git clone https://github.com/SergeyMi37/GraphQL.git
+$ git clone https://github.com/intersystems-community/GraphQL.git
 ```
 
 Open the terminal in this directory and run:
