@@ -3,8 +3,7 @@
 
 [![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ) 
 [![Gitter](https://img.shields.io/badge/article-on%20community-blue.svg)](https://community.intersystems.com/post/graphql-intersystems-data-platforms)
-[![Gitter](https://img.shields.io/badge/demo-server-green.svg)](http://37.139.6.217:57773/graphiql/index.html)
-
+[![Demo](https://img.shields.io/badge/Demo%20on-Cloud%20Run%20Deploy-F4A460)](https://graphql.demo.community.intersystems.com/graphiql/index.html):
 
 
 ## Install GraphQL
@@ -65,8 +64,7 @@ Query and Result
 ![sample](https://pp.userapi.com/c837337/v837337052/61761/vPCZvIXgcJk.jpg)     ![sample](https://pp.userapi.com/c837337/v837337052/6174b/Zd2000W64HI.jpg) 
 
 
-## Example queries for copy and past on [demo server](http://37.139.6.217:57773/graphiql/index.html):
-[![Demo](https://img.shields.io/badge/Demo%20on-Cloud%20Run%20Deploy-F4A460)](https://graphql.demo.community.intersystems.com/graphiql/index.html)
+## Example queries for copy and past on [![Demo](https://img.shields.io/badge/Demo%20on-Cloud%20Run%20Deploy-F4A460)](https://graphql.demo.community.intersystems.com/graphiql/index.html):
 
 **Queries can be simple and complex for several sets of data**
 ```graphql
