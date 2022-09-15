@@ -24,4 +24,3 @@ ClassMethod GetQueryClassname(ast As GraphQL.AST.GraphQLDocument) As %Dictionary
 }
 
 }
-

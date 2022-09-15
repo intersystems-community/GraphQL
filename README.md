@@ -3,8 +3,7 @@
 
 [![Gitter](https://img.shields.io/badge/chat-on%20telegram-blue.svg)](https://t.me/joinchat/FoZ4M0Gl5vGiZ-e0HvFOUQ) 
 [![Gitter](https://img.shields.io/badge/article-on%20community-blue.svg)](https://community.intersystems.com/post/graphql-intersystems-data-platforms)
-[![Gitter](https://img.shields.io/badge/demo-server-green.svg)](http://37.139.6.217:57773/graphiql/index.html)
-
+[![Demo](https://img.shields.io/badge/Demo%20on-Cloud%20Run%20Deploy-F4A460)](https://graphql.demo.community.intersystems.com/graphiql/index.html):
 
 
 ## Install GraphQL
@@ -22,6 +21,41 @@
     - Name - `/graphiql`
     - Namespace - your target namespace, f.e. `SAMPLES`
     - CSP Files Physical Path - f.e. `C:\InterSystems\GraphiQL\`
+
+## Installation with ZPM
+
+If the current ZPM instance is not installed, then in one line you can install the latest version of ZPM even with a proxy.
+```
+s r=##class(%Net.HttpRequest).%New(),proxy=$System.Util.GetEnviron("https_proxy") Do ##class(%Net.URLParser).Parse(proxy,.pr) s:$G(pr("host"))'="" r.ProxyHTTPS=1,r.ProxyTunnel=1,r.ProxyPort=pr("port"),r.ProxyServer=pr("host") s:$G(pr("username"))'=""&&($G(pr("password"))'="") r.ProxyAuthorization="Basic "_$system.Encryption.Base64Encode(pr("username")_":"_pr("password")) set r.Server="pm.community.intersystems.com",r.SSLConfiguration="ISC.FeatureTracker.SSL.Config" d r.Get("/packages/zpm/latest/installer"),$system.OBJ.LoadStream(r.HttpResponse.Data,"c")
+```
+If ZPM is installed, then ZAPM can be set with the command
+```
+zpm:USER>install isc-graphql
+```
+## Installation with Docker
+
+## Prerequisites
+Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [Docker desktop](https://www.docker.com/products/docker-desktop) installed.
+
+## Installation 
+Clone/git pull the repo into any local directory
+
+```
+$ git clone https://github.com/intersystems-community/GraphQL.git
+```
+
+Open the terminal in this directory and run:
+
+```
+$ docker-compose build
+```
+
+3. Run the IRIS container with your project:
+
+```
+$ docker-compose up -d
+```
+	
 ## Example
 Query and Result
 
@@ -30,7 +64,7 @@ Query and Result
 ![sample](https://pp.userapi.com/c837337/v837337052/61761/vPCZvIXgcJk.jpg)     ![sample](https://pp.userapi.com/c837337/v837337052/6174b/Zd2000W64HI.jpg) 
 
 
-## Example queries for copy and past on [demo server](http://37.139.6.217:57773/graphiql/index.html):
+## Example queries for copy and past on [![Demo](https://img.shields.io/badge/Demo%20on-Cloud%20Run%20Deploy-F4A460)](https://graphql.demo.community.intersystems.com/graphiql/index.html):
 
 **Queries can be simple and complex for several sets of data**
 ```graphql
